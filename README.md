@@ -51,7 +51,7 @@ The following table is based on the last 3 blood sugar level measurements: in pa
 
 
 4.	Under normal operating conditions, the system is in the "running" state.
-5.	The controller shall run a self-test program every one minute. This shall test for the conditions shown in Table 2 below. Otherwise, if the tests fail, the system transitions in the "error" state.
+5.	The controller shall run a self-test program every one minute. This shall test for the conditions shown in Table 2 below. Otherwise, if the tests fail, the system transitions in the "error" state and the result of the test is stored in hardwareIssues, which is 'true' in case of an error. HardwareIssues is 'false' whenever the device has not issues.
 
 **Table 2: Error conditions for the insulin pump**
 
@@ -114,7 +114,7 @@ In this case, the controller must block all the system functionality and the use
 
 ### Scenario 4: 
 
- Sugar level increasing and rate of increase stable or increasing ((r2 – r1) ≥ (r1 – r0)) and result of rounded division ≠ 0
+Sugar level increasing and rate of increase stable or increasing ((r2 – r1) ≥ (r1 – r0)) and result of rounded division ≠ 0
 
 r2 = 35
 r1 = 34
@@ -142,7 +142,7 @@ In this case, the controller must block all the system functionality and the use
 
 ### Scenario 5: 
 
- Sugar level increasing and rate of increase stable or increasing ((r2 – r1) ≥ (r1 – r0)) and result of rounded division = 0
+Sugar level increasing and rate of increase stable or increasing ((r2 – r1) ≥ (r1 – r0)) and result of rounded division = 0
 
 **Initial assumption**: A user carries the personal insulin pump device. The device previously measured multiple blood sugar values, stored in r1 and r0. In particular r0 is the oldest measurement done. The insulin pump device has no hardware issues (checked in the last 30 seconds).
 **Normal**: The blood sugar level is measured by a blood sugar sensor and stored in a value r2. After the measurement, the controller checks the previous value (r1): the controller makes a comparison between the current value (r2) and the previous one (r1) and states that r2>r1, i.e the sugar level is increasing.
@@ -152,3 +152,27 @@ Since the compDose is equal to 0 (result of rounded division = 0), but the contr
 In this case, the controller must block all the system functionality and the user has to manually solve the issue(s) (see Scenario 5).
 **Other activities**: in the meantime, the battery is discharging; the user are living their normal life and their blood sugar level is changing.
 **System state on completion**: the controller updates the r-values: the current measurement r2 become r1, r1 become r0, and r0 is discarded, in order to get ready for the next blood sugar measurement.
+
+### Scenario 6: 
+
+Hardware issues right before the blood sugar measurement, the insulin gathering, or the injection. 
+
+**Initial assumption**: A user carries the personal insulin pump device. The device could have previously measured multiple blood sugar values. 
+The insulin pump device has one or more hardware issues but the controller is not aware of it yet.
+**Normal**: Right before the blood sugar measurement, the insulin gathering or the injection, the controller makes another test of safety only on the current component that it is using. 
+The controller states that there is a hardware issue, so it must stop all the current operations sending an error message to the user. The hardware test result is stored in hardwareIssues (= true when there is an error).
+**What can go wrong**: the controller stops when the first error is found, where there might be other errors that would have been checked later in the system flow i.e. low battery, needle extraction...
+**Other activities**: in the meantime, the battery is discharging; the user are living their normal life and their blood sugar level is changing.
+**System state on completion**: the controller has sent an error message to the user that has to provide manually to fix the issue.
+
+### Scenario 7: 
+
+Hardware issues detected and waiting for a fix by the user. 
+
+**Initial assumption**: A user carries the personal insulin pump device. The device could have previously measured multiple blood sugar values. 
+The insulin pump device has one or more hardware issues and the controller is aware of it, therefore hardwareIssue is 'true'.
+**Normal**: The controller is waiting for a manual solution by the user. 
+It must stop all the possible operations sending a message to the user. If the user provide a manual fix to the issue, the controller will send a confirmation message to the user informing them about the current situation of the device.
+**What can go wrong**: While the user are manually solving the issue another hardware issue could happen.
+**Other activities**: while the controller is waiting, in the meantime, the battery is discharging if it is not already fully discharged; the user are living their normal life and their blood sugar level is changing, and they have to manually provide a fix to the issue.
+**System state on completion**: if the user solved all the hardware issues sent by the controller, the latter will send a confirmation message to the user and it will resume its normal activities after changing HardwareIssue to false.
