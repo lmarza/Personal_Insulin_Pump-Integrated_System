@@ -2,9 +2,6 @@
 >An embedded system in an insulin pump used by diabetics to maintain blood glucose control.
 
 
-- Table of Content
-[ToC]
-
 ## :rocket: Introduction:
 
 This work aims to define the operations of control software for an automated insulin pump which is used by diabetics to administer insulin.
@@ -151,4 +148,5 @@ The controller states that there is a hardware issue, so it must stop all the cu
 ## Diagrams
 
 ### Use case diagram: 
-![](https://i.imgur.com/52dbcd8.png)
+![](https://i.imgur.com/bxsmE3F.png)
+
