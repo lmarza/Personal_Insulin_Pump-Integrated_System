@@ -2,6 +2,9 @@
 >An embedded system in an insulin pump used by diabetics to maintain blood glucose control.
 
 
+- Table of Content
+[ToC]
+
 ## :rocket: Introduction:
 
 This work aims to define the operations of control software for an automated insulin pump which is used by diabetics to administer insulin.
@@ -48,7 +51,7 @@ The following table is based on the last 3 blood sugar level measurements: in pa
 
 
 4.	Under normal operating conditions, the system is in the "running" state.
-5.	The controller shall run a self-test program every one minute. If the tests fail, the system is suspended. The result of the test is stored in hardwareIssues, which is 'true' in case of an error. HardwareIssues is 'false' whenever the device has not issues.
+5.	The controller shall run a self-test program every one minute. The result of the test is used to compute the new state:  if the test is 'true' (in case of an error) the new state become 'error', otherwise, if the test is 'false' (the device has not issues) the state remains 'running'. If the new state is 'error' (hardware issues) the system is suspended.
 6. There are 3 displays. The first display displays system messages/hardware issues; the second one shows the last dose of insulin delivered and the last blood sugar measurement; the third one shows the current clock time.
 7.	At the beginning of each 24 hour period, the cumulative dose of insulin delivered is reset to 0.
 8.	A blood sugar sensor measures the current blood sugar reading in micrograms/millilitre. This is updated every 10 minutes and it is normally between 1 and 35 micrograms/millilitre.
@@ -141,7 +144,7 @@ Hardware issues during the self-test or right before the blood sugar measurement
 **Initial assumption**: A user carries the personal insulin pump device. The device could have previously measured multiple blood sugar values. 
 The insulin pump device has one or more hardware issues but the controller is not aware of it yet.
 **Normal**: During the self-test or right before the blood sugar measurement, the insulin gathering or the injection, the controller makes a hardware test.
-The controller states that there is a hardware issue, so it must stop all the current operations sending an error message to the user. The hardware test result is stored in hardwareIssues (= true when there is an error).
+The controller states that there is a hardware issue, so it must stop all the current operations sending an error message to the user. The hardware test result is returned to the controller (is 'true' when there is an error).
 **Other activities**: in the meantime the user are living their normal life and their blood sugar level is changing.
 **System state on completion**: the controller has sent an error message to the user and the system is suspended.
 
@@ -149,4 +152,3 @@ The controller states that there is a hardware issue, so it must stop all the cu
 
 ### Use case diagram: 
 ![](https://i.imgur.com/bxsmE3F.png)
-
