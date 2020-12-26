@@ -2,8 +2,6 @@
 >An embedded system in an insulin pump used by diabetics to maintain blood glucose control.
 
 
-- Table of Content
-[ToC]
 
 ## :rocket: Introduction:
 
@@ -151,7 +149,9 @@ The controller states that there is a hardware issue, so it must stop all the cu
 ## Diagrams
 
 ### Use case diagram: 
-![](https://i.imgur.com/bxsmE3F.png)
+![](https://i.imgur.com/gzFSfYI.png)
+
 
 ### Activity diagram:
 ![](https://i.imgur.com/qz35aum.png)
+
