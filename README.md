@@ -152,3 +152,6 @@ The controller states that there is a hardware issue, so it must stop all the cu
 
 ### Use case diagram: 
 ![](https://i.imgur.com/bxsmE3F.png)
+
+### Activity diagram:
+![](https://i.imgur.com/qz35aum.png)
