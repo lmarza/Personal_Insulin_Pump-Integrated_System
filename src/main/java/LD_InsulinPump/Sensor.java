@@ -1,7 +1,9 @@
+package LD_InsulinPump;
+
 import java.util.Random;
 
 public class Sensor {
-    Random randomNumber;
+    Random randomNumber = new Random();
     final static Float maxBloodSugarValue = 35f;
 
     public Float runMeasurement(){

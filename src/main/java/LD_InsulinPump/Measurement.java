@@ -1,3 +1,5 @@
+package LD_InsulinPump;
+
 import java.util.Objects;
 
 public class Measurement {
@@ -66,5 +68,15 @@ public class Measurement {
     @Override
     public int hashCode() {
         return Objects.hash(compDose, r0, r1, r2);
+    }
+
+    @Override
+    public String toString() {
+        return "Measurement{" +
+                "compDose=" + compDose +
+                ", r0=" + r0 +
+                ", r1=" + r1 +
+                ", r2=" + r2 +
+                '}';
     }
 }

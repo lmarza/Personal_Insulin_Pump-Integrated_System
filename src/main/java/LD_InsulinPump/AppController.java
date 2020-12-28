@@ -1,19 +1,63 @@
+package LD_InsulinPump;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Controller {
+@Controller
+public class AppController {
     private ControllerState state = ControllerState.RUNNING;
     private List<Measurement> measurements = new ArrayList<Measurement>();
     private TestHardware testHardware = new TestHardware();
-    private Sensor sensor;
+    private Sensor sensor = new Sensor();
     private Pump pump = new Pump();
     private NeedleAssembly needleAssembly = new NeedleAssembly();
 
     private final int insulinMinDose = 1;
 
 
+    @RequestMapping("/")
+    public String index(){
+        System.out.println("PROVAAA");
+        return "redirect:/insulinPump";
+    }
 
-    private void checkHardwareIssue(){
+    @RequestMapping("/insulinPump")
+    public String insulinPump(Model model){
+        Float bloodSugarLevel;
+        Integer compDose;
+
+        try
+        {
+            if(state.equals(ControllerState.RUNNING))
+            {
+                checkHardwareIssue();
+                bloodSugarLevel = measureBloodSugarLevel();
+                updateMeasurement(bloodSugarLevel);
+                compDose = computeInsulineToInject();
+                measurements.get(measurements.size()-1).setCompDose(compDose);
+                injectInsulin(compDose);
+                System.out.println(measurements.get(measurements.size()-1).toString());
+                return "insulinPump";
+            }
+        }
+        catch (HardwareIssueException e)
+        {
+            //display message of reboot
+            System.out.println("HardwareIssue: reboot device!");
+        }
+
+        return "insulinPump";
+    }
+
+
+
+    private void checkHardwareIssue() throws HardwareIssueException {
         try
         {
             testHardware.testAllSystem();
@@ -21,7 +65,10 @@ public class Controller {
         catch (HardwareIssueException e)
         {
             state = ControllerState.ERROR;
+            // update display with error
+            //display.showError("error message");
             System.out.println("HardwareIssue");
+            throw e;
         }
     }
 
