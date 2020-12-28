@@ -72,11 +72,11 @@ public class Measurement {
 
     @Override
     public String toString() {
-        return "Measurement{" +
+        return "Measurement[" +
                 "compDose=" + compDose +
                 ", r0=" + r0 +
                 ", r1=" + r1 +
                 ", r2=" + r2 +
-                '}';
+                ']';
     }
 }

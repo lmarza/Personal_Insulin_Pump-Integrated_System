@@ -1,13 +1,14 @@
 package LD_InsulinPump;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class AppController {
@@ -29,28 +30,37 @@ public class AppController {
 
     @RequestMapping("/insulinPump")
     public String insulinPump(Model model){
-        Float bloodSugarLevel;
-        Integer compDose;
 
-        try
-        {
-            if(state.equals(ControllerState.RUNNING))
-            {
-                checkHardwareIssue();
-                bloodSugarLevel = measureBloodSugarLevel();
-                updateMeasurement(bloodSugarLevel);
-                compDose = computeInsulineToInject();
-                measurements.get(measurements.size()-1).setCompDose(compDose);
-                injectInsulin(compDose);
-                System.out.println(measurements.get(measurements.size()-1).toString());
-                return "insulinPump";
+
+        Runnable helloRunnable = new Runnable() {
+            Float bloodSugarLevel;
+            Integer compDose;
+            public void run() {
+                try
+                {
+                    if(state.equals(ControllerState.RUNNING))
+                    {
+                        checkHardwareIssue();
+                        bloodSugarLevel = measureBloodSugarLevel();
+                        updateMeasurement(bloodSugarLevel);
+                        compDose = computeInsulineToInject();
+                        measurements.get(measurements.size()-1).setCompDose(compDose);
+                        injectInsulin(compDose);
+                        System.out.println(measurements.get(measurements.size()-1).toString());
+                        //return "insulinPump";
+                    }
+                }
+                catch (HardwareIssueException e)
+                {
+                    //display message of reboot
+                    System.out.println("HardwareIssue: reboot device!");
+                }
+
             }
-        }
-        catch (HardwareIssueException e)
-        {
-            //display message of reboot
-            System.out.println("HardwareIssue: reboot device!");
-        }
+        };
+
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        executor.scheduleAtFixedRate(helloRunnable, 0, 500, TimeUnit.MILLISECONDS);
 
         return "insulinPump";
     }
@@ -72,8 +82,7 @@ public class AppController {
         }
     }
 
-    private Float measureBloodSugarLevel()
-    {
+    private Float measureBloodSugarLevel() throws HardwareIssueException {
         //check sensor issue
         try
         {
@@ -83,7 +92,7 @@ public class AppController {
         {
             state = ControllerState.ERROR;
             System.out.println("SensorIssue");
-            return null;
+            throw e;
         }
         return sensor.runMeasurement();
     }
@@ -142,8 +151,7 @@ public class AppController {
         return measurements.size() > 2;
     }
 
-    private void injectInsulin(Integer insulinToInject)
-    {
+    private void injectInsulin(Integer insulinToInject) throws HardwareIssueException {
         // run test pump
         try
         {
@@ -153,7 +161,7 @@ public class AppController {
         {
             state = ControllerState.ERROR;
             System.out.println("PumpIssue");
-            return;
+            throw e;
         }
 
         pump.collectInsulin(insulinToInject);
@@ -167,7 +175,7 @@ public class AppController {
         {
             state = ControllerState.ERROR;
             System.out.println("NeedleIssue");
-            return;
+            throw e;
         }
 
         needleAssembly.injectInsulin(insulinToInject);
