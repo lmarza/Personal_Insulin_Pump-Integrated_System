@@ -6,7 +6,12 @@ public class Controller {
     private List<Measurement> measurements = new ArrayList<Measurement>();
     private TestHardware testHardware = new TestHardware();
     private Sensor sensor;
+    private Pump pump = new Pump();
+    private NeedleAssembly needleAssembly = new NeedleAssembly();
+
     private final int insulinMinDose = 1;
+
+
 
     private void checkHardwareIssue(){
         try
@@ -26,14 +31,14 @@ public class Controller {
         try
         {
             testHardware.testSensor(sensor);
-            return sensor.runMeasurement();
         }
         catch (HardwareIssueException e)
         {
             state = ControllerState.ERROR;
             System.out.println("SensorIssue");
+            return null;
         }
-        return null;
+        return sensor.runMeasurement();
     }
 
     private void updateMeasurement(Float lastMeasurement){
@@ -71,11 +76,14 @@ public class Controller {
                     compDose =  Math.round((measurement.getR2() - measurement.getR1())/4);
 
                 if(compDose == 0)
+                {
+                    //measurements.get(measurements.size()-1).setCompDose(insulinMinDose);
                     return insulinMinDose;
+                }
             }
-
         }
 
+        //measurements.get(measurements.size()-1).setCompDose(compDose);
         return compDose;
     }
 
@@ -85,6 +93,37 @@ public class Controller {
 
     private boolean atLeastThreeMeasurements() {
         return measurements.size() > 2;
+    }
+
+    private void injectInsulin(Integer insulinToInject)
+    {
+        // run test pump
+        try
+        {
+            testHardware.testPump(pump);
+        }
+        catch (HardwareIssueException e)
+        {
+            state = ControllerState.ERROR;
+            System.out.println("PumpIssue");
+            return;
+        }
+
+        pump.collectInsulin(insulinToInject);
+
+        // run test needle
+        try
+        {
+            testHardware.testNeedle(needleAssembly);
+        }
+        catch (HardwareIssueException e)
+        {
+            state = ControllerState.ERROR;
+            System.out.println("NeedleIssue");
+            return;
+        }
+
+        needleAssembly.injectInsulin(insulinToInject);
     }
 
 

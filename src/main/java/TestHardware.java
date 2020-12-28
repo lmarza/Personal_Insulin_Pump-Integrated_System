@@ -22,14 +22,14 @@ public class TestHardware{
             throw new HardwareIssueException("HardwareIssue");
     }
 
-    public void testNeedle() throws HardwareIssueException {
+    public void testNeedle(NeedleAssembly needleAssembly) throws HardwareIssueException {
         if (!test)
             randomNum = randomNumber.nextInt(bound);
         if (randomNum > 101 && randomNum < 112)
             throw new HardwareIssueException("NeedleHardwareIssue");
     }
 
-    public void testPump() throws HardwareIssueException {
+    public void testPump(Pump pump) throws HardwareIssueException {
         if (!test)
             randomNum = randomNumber.nextInt(bound);
         if (randomNum > 42 && randomNum < 53)
