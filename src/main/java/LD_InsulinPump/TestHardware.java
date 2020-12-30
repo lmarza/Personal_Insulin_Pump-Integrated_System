@@ -21,27 +21,28 @@ public class TestHardware{
           randomNum = randomNumber.nextInt(bound);
 
         if (randomNum > 732 && randomNum < 743)
-            throw new HardwareIssueException("HardwareIssue");
+            throw new HardwareIssueException("Hardware Issue");
     }
 
     public void testNeedle(NeedleAssembly needleAssembly) throws HardwareIssueException {
         if (!test)
             randomNum = randomNumber.nextInt(bound);
+
         if (randomNum > 101 && randomNum < 112)
-            throw new HardwareIssueException("NeedleHardwareIssue");
+            throw new HardwareIssueException("Needle Hardware Issue");
     }
 
     public void testPump(Pump pump) throws HardwareIssueException {
         if (!test)
             randomNum = randomNumber.nextInt(bound);
         if (randomNum > 42 && randomNum < 53)
-            throw new HardwareIssueException("PumpHardwareIssue");
+            throw new HardwareIssueException("Pump Hardware Issue");
     }
 
     public void testSensor(Sensor sensor) throws HardwareIssueException {
         if (!test)
             randomNum = randomNumber.nextInt(bound);
         if (randomNum > 876 && randomNum < 890)
-            throw new HardwareIssueException("SensorHardwareIssue");
+            throw new HardwareIssueException("Sensor Hardware Issue");
     }
 }

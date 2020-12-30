@@ -74,9 +74,9 @@ public class Measurement {
     public String toString() {
         return "Measurement[" +
                 "compDose=" + compDose +
-                ", r0=" + r0 +
-                ", r1=" + r1 +
-                ", r2=" + r2 +
+                ", r0=" + String.format("%.2f", r0) +
+                ", r1=" + String.format("%.2f", r1) +
+                ", r2=" + String.format("%.2f", r2) +
                 ']';
     }
 }

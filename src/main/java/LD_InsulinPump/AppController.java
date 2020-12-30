@@ -24,15 +24,13 @@ public class AppController {
 
     @RequestMapping("/")
     public String index(){
-        System.out.println("PROVAAA");
         return "redirect:/insulinPump";
     }
 
     @RequestMapping("/insulinPump")
-    public String insulinPump(Model model){
-
-
-        Runnable helloRunnable = new Runnable() {
+    public String insulinPump(Model model)
+    {
+        Runnable controllerRunnable = new Runnable() {
             Float bloodSugarLevel;
             Integer compDose;
             public void run() {
@@ -40,7 +38,6 @@ public class AppController {
                 {
                     if(state.equals(ControllerState.RUNNING))
                     {
-                        checkHardwareIssue();
                         bloodSugarLevel = measureBloodSugarLevel();
                         updateMeasurement(bloodSugarLevel);
                         compDose = computeInsulineToInject();
@@ -53,19 +50,39 @@ public class AppController {
                 catch (HardwareIssueException e)
                 {
                     //display message of reboot
-                    System.out.println("HardwareIssue: reboot device!");
+                    System.err.println(e);
+                    System.err.println("Hardware Issue: reboot device!");
                 }
 
             }
         };
 
+        Runnable testRunnable = new Runnable() {
+            public void run() {
+                try
+                {
+                    if (state.equals(ControllerState.RUNNING)) {
+                        checkHardwareIssue();
+                        System.out.println("oke");
+                    }
+                }
+                catch (HardwareIssueException e)
+                    {
+                        //display message of reboot
+                        System.err.println(e);
+                        System.err.println("Hardware Issue: reboot device!");
+                    }
+            }
+        };
+
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        executor.scheduleAtFixedRate(helloRunnable, 0, 500, TimeUnit.MILLISECONDS);
+        // Call measurement every 10 seconds
+        executor.scheduleAtFixedRate(controllerRunnable, 0, 10, TimeUnit.SECONDS);
+        // Call hardware test every second
+        executor.scheduleAtFixedRate(testRunnable, 0, 1, TimeUnit.SECONDS);
 
         return "insulinPump";
     }
-
-
 
     private void checkHardwareIssue() throws HardwareIssueException {
         try
@@ -77,7 +94,6 @@ public class AppController {
             state = ControllerState.ERROR;
             // update display with error
             //display.showError("error message");
-            System.out.println("HardwareIssue");
             throw e;
         }
     }
@@ -91,7 +107,6 @@ public class AppController {
         catch (HardwareIssueException e)
         {
             state = ControllerState.ERROR;
-            System.out.println("SensorIssue");
             throw e;
         }
         return sensor.runMeasurement();
@@ -160,7 +175,6 @@ public class AppController {
         catch (HardwareIssueException e)
         {
             state = ControllerState.ERROR;
-            System.out.println("PumpIssue");
             throw e;
         }
 
