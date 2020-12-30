@@ -2,7 +2,16 @@ package LD_InsulinPump;
 
 import java.util.Objects;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+@Entity
 public class Measurement {
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Long id;
     private Integer compDose;
     private Float r0,r1,r2;
 

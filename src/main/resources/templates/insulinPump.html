@@ -3,10 +3,118 @@
 <head>
     <title>MVC Web application</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+    <style>
+        body {
+            background-image: url('./images/blue pattern.jpg');
+        }
+
+        .displayStyle
+        {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            font-size: 48px;
+            background-color: white;
+            background-image: url('./images/display.png');
+            background-size: 100%;
+            width: 388px;
+            height: 82px;
+            background-repeat: no-repeat;
+            border-style: solid;
+            border-width: thin;
+            border-color: grey;
+            padding: 5px;
+        }
+
+        .displayErrorStyle
+        {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background-color: white;
+            background-image: url('./images/display.png');
+            background-size: 100%;
+            width: 388px;
+            height: 82px;
+            background-repeat: no-repeat;
+            border-style: solid;
+            border-width: 2px;
+            border-color: darkred;
+            padding: 5px;
+        }
+
+        .column {
+            float: left;
+            width: 50%;
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+
+        .button {
+            background-color: white;
+            border: none;
+            color: black;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            transition-duration: 0.4s;
+            border: 2px solid dodgerblue;
+            margin: 50px;
+        }
+
+        .button:hover {
+            background-color: dodgerblue;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
-<h1>Personal insulin pump (Integrated system)</h1>
+
+<center>
+    <div>
+        <h1 style="background-color: rgba(255, 255, 255, 0.4); padding: 5px; width: 50%">
+            Personal insulin pump device
+        </h1>
+
+        <div class="column">
+            <h3>Last blood sugar level measurement:</h3>
+            <div class="displayStyle">
+                <p th:text="${currentMeasurement.r2} + ' μg/ml'"></p>
+            </div>
+
+            <h3>Last insulin dose injected:</h3>
+            <div class="displayStyle">
+                <p th:text="${currentMeasurement.compDose} + ' unit'"></p>
+            </div>
+        </div>
+
+        <div class="column">
+            <h3>Current device state:</h3>
+            <div class="displayErrorStyle">
+                ERROR
+            </div>
+
+            <h3>Clock:</h3>
+            <div class="displayStyle">
+                <iframe src="http://free.timeanddate.com/clock/i7m2s6i5/n254/tlit6/fn12/fs48/tct/pct" frameborder="0" width="234" height="50" allowTransparency="true"></iframe>
+            </div>
+
+        </div>
+
+        <button class="button" type="button">Reboot device</button>
+    </div>
+</center>
 
 
 </body>

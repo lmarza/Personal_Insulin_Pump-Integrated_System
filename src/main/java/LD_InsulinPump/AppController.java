@@ -43,7 +43,8 @@ public class AppController {
                         compDose = computeInsulineToInject();
                         measurements.get(measurements.size()-1).setCompDose(compDose);
                         injectInsulin(compDose);
-                        System.out.println(measurements.get(measurements.size()-1).toString());
+                        System.out.println(measurements.get(measurements.size()-1));
+                        model.addAttribute("currentMeasurement", measurements.get(measurements.size()-1));
                         //return "insulinPump";
                     }
                 }
