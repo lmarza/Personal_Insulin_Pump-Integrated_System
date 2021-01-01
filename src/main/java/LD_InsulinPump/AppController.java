@@ -2,6 +2,7 @@ package LD_InsulinPump;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
@@ -13,6 +14,11 @@ import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+/*
+* return "list"; : torna la vista html di nome 'list.html' ma NON chiama la funzione attaccata al routing (cioè non chiama /list)
+* return "redirect:/list"; : torna la vista html di nome 'list.html' E chiama anche la funzione attaccata al routing (chiama anche /list)
+* */
 
 @Controller
 @EnableScheduling
@@ -26,26 +32,46 @@ public class AppController {
 
     private final int insulinMinDose = 1;
 
+    @Autowired
+    private SimpMessagingTemplate template;
+
     @RequestMapping("/")
     public String index(){
-        return "redirect:/insulinPump";
+        return "insulinPump";
     }
 
     //10 sec
     @Scheduled(fixedDelay=10000)
-    @RequestMapping("/insulinPump")
-    public String insulinPump()
+    public void runAndSendMeasurement()
     {
-        measurementFlow();
-        return "redirect:/updateView";
+        Measurement currentMeasurement = null;
+
+        if(state.equals(ControllerState.RUNNING))
+            currentMeasurement = measurementFlow(); //this also updates the state attribute
+
+        // check again if the state has changed (eg: hardware test failure)
+        if(currentMeasurement != null && state.equals(ControllerState.RUNNING))
+        {
+            this.template.convertAndSend("/topic/measurements", currentMeasurement);
+        }
     }
 
-    @RequestMapping("/updateView")
-    public String updateView(Model model)
+    //1 sec
+    @Scheduled(fixedDelay=1000)
+    public void hardwareTestFlow()
     {
-        model.addAttribute("currentMeasurement", measurements.get(measurements.size()-1));
+        try
+        {
+            if (state.equals(ControllerState.RUNNING)) {
+                checkHardwareIssue();
 
-        return "insulinPump";
+                System.out.println("oke");
+            }
+        }
+        catch (HardwareIssueException e)
+        {
+            this.template.convertAndSend("/topic/state", "Hardware issue: reboot device");
+        }
     }
 
     public Measurement measurementFlow()
@@ -62,43 +88,19 @@ public class AppController {
                 compDose = computeInsulineToInject();
                 measurements.get(measurements.size()-1).setCompDose(compDose);
                 injectInsulin(compDose);
-                System.out.println(measurements.get(measurements.size()-1));
                 return measurements.get(measurements.size()-1);
             }
         }
         catch (HardwareIssueException e)
         {
-            //display message of reboot
-            System.err.println(e);
-            System.err.println("Hardware Issue: reboot device!");
+            this.template.convertAndSend("/topic/state", "Hardware Issue: reboot device!");
         }
         return null;
     }
 
-    /*
-    //1 sec
-    @Scheduled(fixedDelay=1000)
-    public String hardwareTestFlow()
+
+    private void checkHardwareIssue() throws HardwareIssueException
     {
-        try
-        {
-            if (state.equals(ControllerState.RUNNING)) {
-                checkHardwareIssue();
-                System.out.println("oke");
-            }
-        }
-        catch (HardwareIssueException e)
-        {
-            //display message of reboot
-            System.err.println(e);
-            System.err.println("Hardware Issue: reboot device!");
-        }
-
-        return "getEventCount";
-    }
-     */
-
-    private void checkHardwareIssue() throws HardwareIssueException {
         try
         {
             testHardware.testAllSystem();
@@ -106,14 +108,12 @@ public class AppController {
         catch (HardwareIssueException e)
         {
             state = ControllerState.ERROR;
-            // update display with error
-            //display.showError("error message");
+            this.template.convertAndSend("/topic/state", "Hardware issue: general system failure");
             throw e;
         }
     }
 
     private Float measureBloodSugarLevel() throws HardwareIssueException {
-        //check sensor issue
         try
         {
             testHardware.testSensor(sensor);
@@ -121,6 +121,7 @@ public class AppController {
         catch (HardwareIssueException e)
         {
             state = ControllerState.ERROR;
+            this.template.convertAndSend("/topic/state", "Hardware issue: sensor issue");
             throw e;
         }
         return sensor.runMeasurement();
@@ -180,8 +181,8 @@ public class AppController {
         return measurements.size() > 2;
     }
 
-    private void injectInsulin(Integer insulinToInject) throws HardwareIssueException {
-        // run test pump
+    private void injectInsulin(Integer insulinToInject) throws HardwareIssueException
+    {
         try
         {
             testHardware.testPump(pump);
@@ -189,12 +190,12 @@ public class AppController {
         catch (HardwareIssueException e)
         {
             state = ControllerState.ERROR;
+            this.template.convertAndSend("/topic/state", "Hardware issue: pump issue");
             throw e;
         }
 
         pump.collectInsulin(insulinToInject);
 
-        // run test needle
         try
         {
             testHardware.testNeedle(needleAssembly);
@@ -202,12 +203,10 @@ public class AppController {
         catch (HardwareIssueException e)
         {
             state = ControllerState.ERROR;
-            System.out.println("NeedleIssue");
+            this.template.convertAndSend("/topic/state", "Hardware issue: needle issue");
             throw e;
         }
 
         needleAssembly.injectInsulin(insulinToInject);
     }
-
-
 }
