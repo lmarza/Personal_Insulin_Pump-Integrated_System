@@ -15,6 +15,8 @@ public class Measurement {
     private Integer compDose;
     private Float r0,r1,r2;
 
+    public Measurement(){}
+
     public Measurement(Float r2) {
         this(null, null, r2);
     }

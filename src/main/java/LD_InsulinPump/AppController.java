@@ -1,16 +1,21 @@
 package LD_InsulinPump;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Controller
+@EnableScheduling
 public class AppController {
     private ControllerState state = ControllerState.RUNNING;
     private List<Measurement> measurements = new ArrayList<Measurement>();
@@ -21,69 +26,77 @@ public class AppController {
 
     private final int insulinMinDose = 1;
 
-
     @RequestMapping("/")
     public String index(){
         return "redirect:/insulinPump";
     }
 
+    //10 sec
+    @Scheduled(fixedDelay=10000)
     @RequestMapping("/insulinPump")
-    public String insulinPump(Model model)
+    public String insulinPump()
     {
-        Runnable controllerRunnable = new Runnable() {
-            Float bloodSugarLevel;
-            Integer compDose;
-            public void run() {
-                try
-                {
-                    if(state.equals(ControllerState.RUNNING))
-                    {
-                        bloodSugarLevel = measureBloodSugarLevel();
-                        updateMeasurement(bloodSugarLevel);
-                        compDose = computeInsulineToInject();
-                        measurements.get(measurements.size()-1).setCompDose(compDose);
-                        injectInsulin(compDose);
-                        System.out.println(measurements.get(measurements.size()-1));
-                        model.addAttribute("currentMeasurement", measurements.get(measurements.size()-1));
-                        //return "insulinPump";
-                    }
-                }
-                catch (HardwareIssueException e)
-                {
-                    //display message of reboot
-                    System.err.println(e);
-                    System.err.println("Hardware Issue: reboot device!");
-                }
+        measurementFlow();
+        return "redirect:/updateView";
+    }
 
-            }
-        };
-
-        Runnable testRunnable = new Runnable() {
-            public void run() {
-                try
-                {
-                    if (state.equals(ControllerState.RUNNING)) {
-                        checkHardwareIssue();
-                        System.out.println("oke");
-                    }
-                }
-                catch (HardwareIssueException e)
-                    {
-                        //display message of reboot
-                        System.err.println(e);
-                        System.err.println("Hardware Issue: reboot device!");
-                    }
-            }
-        };
-
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        // Call measurement every 10 seconds
-        executor.scheduleAtFixedRate(controllerRunnable, 0, 10, TimeUnit.SECONDS);
-        // Call hardware test every second
-        executor.scheduleAtFixedRate(testRunnable, 0, 1, TimeUnit.SECONDS);
+    @RequestMapping("/updateView")
+    public String updateView(Model model)
+    {
+        model.addAttribute("currentMeasurement", measurements.get(measurements.size()-1));
 
         return "insulinPump";
     }
+
+    public Measurement measurementFlow()
+    {
+        Float bloodSugarLevel;
+        Integer compDose;
+
+        try
+        {
+            if(state.equals(ControllerState.RUNNING))
+            {
+                bloodSugarLevel = measureBloodSugarLevel();
+                updateMeasurement(bloodSugarLevel);
+                compDose = computeInsulineToInject();
+                measurements.get(measurements.size()-1).setCompDose(compDose);
+                injectInsulin(compDose);
+                System.out.println(measurements.get(measurements.size()-1));
+                return measurements.get(measurements.size()-1);
+            }
+        }
+        catch (HardwareIssueException e)
+        {
+            //display message of reboot
+            System.err.println(e);
+            System.err.println("Hardware Issue: reboot device!");
+        }
+        return null;
+    }
+
+    /*
+    //1 sec
+    @Scheduled(fixedDelay=1000)
+    public String hardwareTestFlow()
+    {
+        try
+        {
+            if (state.equals(ControllerState.RUNNING)) {
+                checkHardwareIssue();
+                System.out.println("oke");
+            }
+        }
+        catch (HardwareIssueException e)
+        {
+            //display message of reboot
+            System.err.println(e);
+            System.err.println("Hardware Issue: reboot device!");
+        }
+
+        return "getEventCount";
+    }
+     */
 
     private void checkHardwareIssue() throws HardwareIssueException {
         try
