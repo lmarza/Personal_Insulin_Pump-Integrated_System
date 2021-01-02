@@ -4,7 +4,7 @@ import java.util.Random;
 
 public class TestHardware{
     Random randomNumber = new Random();
-    final static int bound = 2000;
+    final static int bound = 1000;
     int randomNum = 0;
     boolean testAlwaysFails = false;
 

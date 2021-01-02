@@ -29,6 +29,7 @@ public class AppController {
     private Sensor sensor = new Sensor();
     private Pump pump = new Pump();
     private NeedleAssembly needleAssembly = new NeedleAssembly();
+    private ScheduledExecutorService executor;
 
     private final int initialDelay = 5; //in seconds
     private final int measurementSchedule = 10; //in seconds
@@ -40,21 +41,22 @@ public class AppController {
 
     @RequestMapping("/")
     public String index(){
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+        executor = Executors.newScheduledThreadPool(1);
 
-        /*new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {*/
+        runAndSendMeasurement(executor);
+        runAndSendHardwareTest(executor);
 
-                        runAndSendMeasurement(executor);
-                        runAndSendHardwareTest(executor);
-                   /* }
-                },
-                2000
-        );
-*/
         return "insulinPump";
+    }
+
+    @RequestMapping("/rebootDevice")
+    public String rebootDevice()
+    {
+        measurements.clear();
+        state = ControllerState.RUNNING;
+        executor.shutdownNow();
+
+        return "redirect:/";
     }
 
     //10 sec

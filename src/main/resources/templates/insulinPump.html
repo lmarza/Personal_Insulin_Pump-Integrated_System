@@ -32,7 +32,7 @@
                     //optional, it wants a Measurement type
                     let measurement = Object.assign(new Measurement, parsedMeasurement);
 
-                    document.getElementById("r2").innerText = measurement.r2 + " μg/ml";
+                    document.getElementById("r2").innerText = measurement.r2.toFixed(2) + " μg/ml";
                     document.getElementById("compDose").innerText = measurement.compDose + " unit(s)";
 
                     if(document.getElementById("state").innerText.includes("Booting"))
@@ -55,6 +55,8 @@
                     stateElement.parentElement.style.borderColor = "darkred";
                     stateElement.parentElement.style.backgroundColor = "darkred";
                     stateElement.parentElement.style.color = "white";
+
+                    document.getElementById("rebootForm").style.display = "block";
                 });
             });
         }
@@ -171,7 +173,9 @@
 
         </div>
 
-        <button class="button" type="button">Reboot device</button>
+        <form action="rebootDevice" id="rebootForm" style="display: none;">
+            <button type="submit" class="button">Reboot device</button>
+        </form>
     </div>
 </center>
 
