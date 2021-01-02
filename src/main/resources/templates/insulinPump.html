@@ -32,8 +32,15 @@
                     //optional, it wants a Measurement type
                     let measurement = Object.assign(new Measurement, parsedMeasurement);
 
-                    document.getElementById("r2").innerText = measurement.r2;
-                    document.getElementById("compDose").innerText = measurement.compDose;
+                    document.getElementById("r2").innerText = measurement.r2 + " μg/ml";
+                    document.getElementById("compDose").innerText = measurement.compDose + " unit(s)";
+
+                    if(document.getElementById("state").innerText.includes("Booting"))
+                    {
+                        document.getElementById("state").innerText = "RUNNING";
+                    }
+
+                    console.log(measurement);
                 });
 
                 stompClient.subscribe('/topic/state', function (message)
@@ -141,19 +148,19 @@
         <div class="column">
             <h3>Last blood sugar level measurement:</h3>
             <div class="displayStyle">
-                <p id="r2"></p> &nbsp;μg/ml
+                <p id="r2">Booting device...</p> &nbsp;
             </div>
 
             <h3>Last insulin dose injected:</h3>
             <div class="displayStyle">
-                <p id="compDose"></p> &nbsp;unit(s)
+                <p id="compDose">Booting device...</p>
             </div>
         </div>
 
         <div class="column">
             <h3>Current device state:</h3>
             <div class="displayErrorStyle">
-                <p id="state">RUNNING</p>
+                <p id="state">Booting device...</p>
             </div>
 
             <h3>Clock:</h3>

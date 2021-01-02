@@ -30,6 +30,9 @@ public class AppController {
     private Pump pump = new Pump();
     private NeedleAssembly needleAssembly = new NeedleAssembly();
 
+    private final int initialDelay = 5; //in seconds
+    private final int measurementSchedule = 10; //in seconds
+    private final int hardwareTestSchedule = 1; // in seconds
     private final int insulinMinDose = 1;
 
     @Autowired
@@ -37,41 +40,70 @@ public class AppController {
 
     @RequestMapping("/")
     public String index(){
+        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
+        /*new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {*/
+
+                        runAndSendMeasurement(executor);
+                        runAndSendHardwareTest(executor);
+                   /* }
+                },
+                2000
+        );
+*/
         return "insulinPump";
     }
 
     //10 sec
-    @Scheduled(fixedDelay=10000)
-    public void runAndSendMeasurement()
+    //@Scheduled(fixedDelay=10000)
+    public void runAndSendMeasurement(ScheduledExecutorService executor)
     {
-        Measurement currentMeasurement = null;
+        Runnable runMeasurement = new Runnable() {
+            public void run()
+            {
+                Measurement currentMeasurement = null;
 
-        if(state.equals(ControllerState.RUNNING))
-            currentMeasurement = measurementFlow(); //this also updates the state attribute
+                if(state.equals(ControllerState.RUNNING))
+                    currentMeasurement = measurementFlow(); //this also updates the state attribute
 
-        // check again if the state has changed (eg: hardware test failure)
-        if(currentMeasurement != null && state.equals(ControllerState.RUNNING))
-        {
-            this.template.convertAndSend("/topic/measurements", currentMeasurement);
-        }
+                // check again if the state has changed (eg: hardware test failure)
+                if(currentMeasurement != null && state.equals(ControllerState.RUNNING))
+                {
+                    template.convertAndSend("/topic/measurements", currentMeasurement);
+                    System.out.println(currentMeasurement);
+                }
+            }
+        };
+
+        // Call measurement every 10 seconds
+        executor.scheduleAtFixedRate(runMeasurement, initialDelay, measurementSchedule, TimeUnit.SECONDS);
     }
 
     //1 sec
-    @Scheduled(fixedDelay=1000)
-    public void hardwareTestFlow()
+    //@Scheduled(fixedDelay=1000)
+    public void runAndSendHardwareTest(ScheduledExecutorService executor)
     {
-        try
-        {
-            if (state.equals(ControllerState.RUNNING)) {
-                checkHardwareIssue();
-
-                System.out.println("oke");
+        Runnable runMeasurement = new Runnable() {
+            public void run()
+            {
+                try
+                {
+                    if (state.equals(ControllerState.RUNNING)) {
+                        checkHardwareIssue();
+                    }
+                }
+                catch (HardwareIssueException e)
+                {
+                    template.convertAndSend("/topic/state", "Hardware issue: reboot device");
+                }
             }
-        }
-        catch (HardwareIssueException e)
-        {
-            this.template.convertAndSend("/topic/state", "Hardware issue: reboot device");
-        }
+        };
+
+        // Call measurement every 1 second
+        executor.scheduleAtFixedRate(runMeasurement, initialDelay, hardwareTestSchedule, TimeUnit.SECONDS);
     }
 
     public Measurement measurementFlow()
