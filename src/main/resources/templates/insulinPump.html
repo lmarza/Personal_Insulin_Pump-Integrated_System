@@ -47,11 +47,12 @@
                 {
                     let stateElement = document.getElementById("state");
 
-                    if(stateElement.innerText.includes("RUNNING"))
+                    if(stateElement.innerText.includes("RUNNING") || stateElement.innerText.includes("Booting"))
                         stateElement.innerText = "";
 
                     stateElement.innerText = message.body + "\n" + stateElement.innerText;
 
+                    stateElement.parentElement.style.borderColor = "darkred";
                     stateElement.parentElement.style.backgroundColor = "darkred";
                     stateElement.parentElement.style.color = "white";
                 });
@@ -64,7 +65,7 @@
     <style>
         body
         {
-            background-image: url('./images/blue pattern.jpg');
+            background-image: url('/images/blue pattern.jpg');
         }
 
         .displayStyle
@@ -75,7 +76,7 @@
 
             font-size: 48px;
             background-color: white;
-            background-image: url('./images/display.png');
+            background-image: url('/images/display.png');
             background-size: 100%;
             width: 388px;
             height: 82px;
@@ -86,21 +87,21 @@
             padding: 5px;
         }
 
-        .displayErrorStyle
+        .displayStateStyle
         {
             display: flex;
             justify-content: center;
             align-items: center;
 
-            background-color: white;
-            background-image: url('./images/display.png');
+            background-color: #ccffb5;
+            background-image: url("/images/display.png");
             background-size: 100%;
             width: 388px;
             height: 82px;
             background-repeat: no-repeat;
             border-style: solid;
             border-width: 2px;
-            border-color: darkred;
+            border-color: darkgreen;
             padding: 5px;
         }
 
@@ -159,7 +160,7 @@
 
         <div class="column">
             <h3>Current device state:</h3>
-            <div class="displayErrorStyle">
+            <div class="displayStateStyle">
                 <p id="state">Booting device...</p>
             </div>
 
