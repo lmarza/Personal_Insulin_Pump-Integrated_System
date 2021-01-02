@@ -7,7 +7,11 @@ public class Sensor {
     final static Float maxBloodSugarValue = 35f;
 
     public Float runMeasurement(){
-        //TODO: check if it is correct
         return 1 + randomNumber.nextFloat() * (maxBloodSugarValue - 1) ;
+    }
+
+    public Float fixedMeasurement(Float fixedValue)
+    {
+        return fixedValue;
     }
 }
