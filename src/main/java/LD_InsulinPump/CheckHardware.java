@@ -2,17 +2,15 @@ package LD_InsulinPump;
 
 import java.util.Random;
 
-public class TestHardware{
+// TODO: Replace with methods inside sensor, pump, etc. Maybe can be an interface
+public interface CheckHardware {
     Random randomNumber = new Random();
     final static int bound = 1000;
     int randomNum = 0;
-    boolean testAlwaysFails = false;
 
-
-    public void setTestAlwaysFails(boolean testAlwaysFails) {
-        this.testAlwaysFails = testAlwaysFails;
-    }
-
+    boolean isHardwareWorking();
+/*
+    @Deprecated
     public void testAllSystem() throws HardwareIssueException {
         if(testAlwaysFails)
             throw new HardwareIssueException("Hardware Issue");
@@ -23,6 +21,7 @@ public class TestHardware{
             throw new HardwareIssueException("Hardware Issue");
     }
 
+    @Deprecated
     public void testNeedle(NeedleAssembly needleAssembly) throws HardwareIssueException {
         if(testAlwaysFails)
             throw new HardwareIssueException("Needle Hardware Issue");
@@ -33,6 +32,7 @@ public class TestHardware{
             throw new HardwareIssueException("Needle Hardware Issue");
     }
 
+    @Deprecated
     public void testPump(Pump pump) throws HardwareIssueException {
         if(testAlwaysFails)
             throw new HardwareIssueException("Pump Hardware Issue");
@@ -42,14 +42,6 @@ public class TestHardware{
         if (randomNum > 42 && randomNum < 53)
             throw new HardwareIssueException("Pump Hardware Issue");
     }
+*/
 
-    public void testSensor(Sensor sensor) throws HardwareIssueException {
-        if (testAlwaysFails)
-            throw new HardwareIssueException("Sensor Hardware Issue");
-
-        randomNum = randomNumber.nextInt(bound);
-
-        if (randomNum > 876 && randomNum < 890)
-            throw new HardwareIssueException("Sensor Hardware Issue");
-    }
 }

@@ -21,8 +21,7 @@ import java.util.concurrent.TimeUnit;
 public class AppController {
     private ControllerState state = ControllerState.RUNNING;
     private List<Measurement> measurements = new ArrayList<Measurement>();
-    private TestHardware testHardware = new TestHardware();
-    private Sensor sensor = new Sensor();
+    private Sensor sensor = new SensorRandomImpl(new Random(), new Random());
     private Pump pump = new Pump();
     private NeedleAssembly needleAssembly = new NeedleAssembly();
     private ScheduledExecutorService executor;
@@ -114,7 +113,7 @@ public class AppController {
             if(state.equals(ControllerState.RUNNING))
             {
                 bloodSugarLevel = measureBloodSugarLevel();
-                updateMeasurement(bloodSugarLevel);
+                updateMeasurement(bloodSugarLevel, measurements);
                 compDose = computeInsulinToInject(measurements.get(measurements.size()-1));
                 measurements.get(measurements.size()-1).setCompDose(compDose);
                 injectInsulin(compDose);
@@ -131,7 +130,7 @@ public class AppController {
 
     private void checkHardwareIssue() throws HardwareIssueException
     {
-        try
+        /*try
         {
             testHardware.testAllSystem();
         }
@@ -140,13 +139,13 @@ public class AppController {
             state = ControllerState.ERROR;
             this.template.convertAndSend("/topic/state", "Hardware issue: general system failure");
             throw e;
-        }
+        }*/
     }
 
     private Float measureBloodSugarLevel() throws HardwareIssueException {
         try
         {
-            testHardware.testSensor(sensor);
+           return sensor.runMeasurement();
         }
         catch (HardwareIssueException e)
         {
@@ -154,17 +153,15 @@ public class AppController {
             this.template.convertAndSend("/topic/state", "Hardware issue: sensor issue");
             throw e;
         }
-        return sensor.runMeasurement();
     }
 
-    private void updateMeasurement(Float lastMeasurement){
-        if(measurements.isEmpty())
-            measurements.add(new Measurement(lastMeasurement));
-        else if (measurements.size() == 1)
-            measurements.add(new Measurement(measurements.get(0).getR2(), lastMeasurement));
+    public void updateMeasurement(Float lastMeasurement, List<Measurement> measurementList){
+        if(measurementList.isEmpty())
+            measurementList.add(new Measurement(lastMeasurement));
+        else if (measurementList.size() == 1)
+            measurementList.add(new Measurement(measurementList.get(0).getR2(), lastMeasurement));
         else
-            measurements.add(new Measurement(measurements.get(measurements.size()-1).getR1(), measurements.get(measurements.size()-1).getR2(),lastMeasurement));
-
+            measurementList.add(new Measurement(measurementList.get(measurementList.size()-1).getR1(), measurementList.get(measurementList.size()-1).getR2(),lastMeasurement));
     }
 
     public int computeInsulinToInject(Measurement measurement){
@@ -207,7 +204,7 @@ public class AppController {
 
     private void injectInsulin(Integer insulinToInject) throws HardwareIssueException
     {
-        try
+        /*try
         {
             testHardware.testPump(pump);
         }
@@ -216,10 +213,10 @@ public class AppController {
             state = ControllerState.ERROR;
             this.template.convertAndSend("/topic/state", "Hardware issue: pump issue");
             throw e;
-        }
+        }*/
 
         pump.collectInsulin(insulinToInject);
-
+/*
         try
         {
             testHardware.testNeedle(needleAssembly);
@@ -229,7 +226,7 @@ public class AppController {
             state = ControllerState.ERROR;
             this.template.convertAndSend("/topic/state", "Hardware issue: needle issue");
             throw e;
-        }
+        }*/
 
         needleAssembly.injectInsulin(insulinToInject);
     }
