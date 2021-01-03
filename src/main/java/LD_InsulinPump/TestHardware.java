@@ -8,9 +8,6 @@ public class TestHardware{
     int randomNum = 0;
     boolean testAlwaysFails = false;
 
-    public void setRandomNum(int randomNum) {
-        this.randomNum = randomNum;
-    }
 
     public void setTestAlwaysFails(boolean testAlwaysFails) {
         this.testAlwaysFails = testAlwaysFails;

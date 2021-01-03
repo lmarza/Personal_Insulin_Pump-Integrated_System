@@ -1,13 +1,9 @@
 package LD_InsulinPump;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -119,7 +115,7 @@ public class AppController {
             {
                 bloodSugarLevel = measureBloodSugarLevel();
                 updateMeasurement(bloodSugarLevel);
-                compDose = computeInsulineToInject();
+                compDose = computeInsulinToInject(measurements.get(measurements.size()-1));
                 measurements.get(measurements.size()-1).setCompDose(compDose);
                 injectInsulin(compDose);
                 return measurements.get(measurements.size()-1);
@@ -171,11 +167,11 @@ public class AppController {
 
     }
 
-    private int computeInsulineToInject(){
-        Measurement measurement = measurements.get(measurements.size()-1);
+    public int computeInsulinToInject(Measurement measurement){
+
         int compDose = 0;
 
-        if(oneMeasurement())
+        if(measurement.hasExactlyOneMeasurement())
             return 0;
 
         // this is executed when we have at least two element in the ArrayList
@@ -185,7 +181,7 @@ public class AppController {
         }
 
         // this is executed when we have at least three element in the ArrayList
-        if(atLeastThreeMeasurements())
+        if(measurement.hasThreeMeasurements())
         {
             // Sugar level increasing and rate of increase decreasing
             if(measurement.getR2() > measurement.getR1())
@@ -207,13 +203,7 @@ public class AppController {
         return compDose;
     }
 
-    private boolean oneMeasurement() {
-        return measurements.size() == 1;
-    }
 
-    private boolean atLeastThreeMeasurements() {
-        return measurements.size() > 2;
-    }
 
     private void injectInsulin(Integer insulinToInject) throws HardwareIssueException
     {

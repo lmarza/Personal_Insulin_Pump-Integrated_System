@@ -66,22 +66,6 @@ public class Measurement {
 
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Measurement)) return false;
-        Measurement that = (Measurement) o;
-        return Objects.equals(compDose, that.compDose) &&
-                Objects.equals(r0, that.r0) &&
-                Objects.equals(r1, that.r1) &&
-                Objects.equals(r2, that.r2);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(compDose, r0, r1, r2);
-    }
-
-    @Override
     public String toString() {
         return "Measurement[" +
                 "compDose=" + compDose +
@@ -89,5 +73,14 @@ public class Measurement {
                 ", r1=" + String.format("%.2f", r1) +
                 ", r2=" + String.format("%.2f", r2) +
                 ']';
+    }
+
+    public boolean hasExactlyOneMeasurement() {
+        return this.r2 != null && this.r1 == null && this.r0 == null;
+    }
+
+    public boolean hasThreeMeasurements() {
+
+        return this.r2 != null && this.r1 != null && this.r0 != null;
     }
 }
