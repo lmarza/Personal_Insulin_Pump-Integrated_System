@@ -1,116 +1,156 @@
 package LD_insulinPump;
 
-import LD_InsulinPump.AppController;
-import LD_InsulinPump.Measurement;
-import LD_InsulinPump.Sensor;
-import LD_InsulinPump.SensorRandomImpl;
+import LD_InsulinPump.*;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertEquals;
 
-public class TestMeasurementJU {
+public class TestMeasurementJU
+{
+    @Test
+    public void testMeasurementEmptyConstructor()
+    {
+        Measurement measurement = new Measurement();
+        assertNull(measurement.getCompDose());
+        assertNull(measurement.getR0());
+        assertNull(measurement.getR1());
+        assertNull(measurement.getR2());
+    }
+
+    @Test
+    public void testMeasurementConstructorOneParam()
+    {
+        Measurement measurement = new Measurement(5f);
+        assertEquals(Integer.valueOf(0), measurement.getCompDose());
+        assertNull(measurement.getR0());
+        assertNull(measurement.getR1());
+        assertEquals(Float.valueOf(5f), measurement.getR2());
+    }
+
+    @Test
+    public void testMeasurementConstructorTwoParam()
+    {
+        Measurement measurement = new Measurement(21.9f, 5f);
+        assertEquals(Integer.valueOf(0), measurement.getCompDose());
+        assertNull(measurement.getR0());
+        assertEquals(Float.valueOf(21.9f), measurement.getR1());
+        assertEquals(Float.valueOf(5f), measurement.getR2());
+    }
+
+    @Test
+    public void testMeasurementConstructorThreeParam()
+    {
+        Measurement measurement = new Measurement(7.61f, 21.9f, 5f);
+        assertEquals(Integer.valueOf(0), measurement.getCompDose());
+        assertEquals(Float.valueOf(7.61f), measurement.getR0());
+        assertEquals(Float.valueOf(21.9f), measurement.getR1());
+        assertEquals(Float.valueOf(5f), measurement.getR2());
+    }
+
+    @Test
+    public void testMeasurementCompDose()
+    {
+        Measurement measurement = new Measurement();
+        measurement.setCompDose(5);
+        assertEquals(Integer.valueOf(5), measurement.getCompDose());
+    }
+
+    @Test
+    public void testMeasurementR0()
+    {
+        Measurement measurement = new Measurement();
+        measurement.setR0(5f);
+        assertEquals(Float.valueOf(5f), measurement.getR0());
+    }
+
+    @Test
+    public void testMeasurementR1()
+    {
+        Measurement measurement = new Measurement();
+        measurement.setR1(5f);
+        assertEquals(Float.valueOf(5f), measurement.getR1());
+    }
+
+    @Test
+    public void testMeasurementR2()
+    {
+        Measurement measurement = new Measurement();
+        measurement.setR2(5f);
+        assertEquals(Float.valueOf(5f), measurement.getR2());
+    }
+
+    @Test
+    public void testToString()
+    {
+        Measurement measurement = new Measurement(5.212f, 16.2344f, 27.364f);
+        assertEquals("Measurement[compDose=0, r0=5,21, r1=16,23, r2=27,36]", measurement.toString());
+    }
 
     /*
-    @Test
-    public void TestUpdateMeasurementBloodSugarLevel()
-    {
-        Measurement measurement1;
-        Measurement measurement2;
-        Measurement measurement3;
-        Sensor sensor = new SensorRandomImpl();
+    * public boolean hasExactlyOneMeasurement() {
+        return this.r2 != null && this.r1 == null && this.r0 == null;
+    }
 
-        measurement1 = new Measurement(sensor.fixedMeasurement(2.5f));
-        assertNull(measurement1.getR1());
-        assertNull(measurement1.getR0());
-        assertEquals(Float.valueOf(2.5f), measurement1.getR2());
-
-        measurement2 = new Measurement( measurement1.getR2(), sensor.fixedMeasurement(3.7f));
-        assertNull(measurement2.getR0());
-        assertEquals(Float.valueOf(3.7f), measurement2.getR2());
-        assertEquals(Float.valueOf(2.5f), measurement2.getR1());
-
-        measurement3 = new Measurement(measurement2.getR1(), measurement2.getR2(), sensor.fixedMeasurement(18.9f));
-        assertEquals(Float.valueOf(18.9f), measurement3.getR2());
-        assertEquals(Float.valueOf(3.7f), measurement3.getR1());
-        assertEquals(Float.valueOf(2.5f), measurement3.getR0());
-
+    public boolean hasThreeMeasurements() {
+        return this.r2 != null && this.r1 != null && this.r0 != null;
     }*/
-
-    /**
-     * This method tests the computation of insulin to inject in the case of blood sugar level falling (r2 < r1)
-     */
-
     @Test
-    public void TestComputeInsulinToInjectC1()
+    public void testHasExactlyOneMeasurement()
     {
-        Measurement measurement = new Measurement(15.84f, 10.35f);
-        assertTrue(measurement.getR2() < measurement.getR1());
-        assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
-        assertEquals(measurement.getCompDose(), Integer.valueOf(0));
+        Measurement m;
+
+        // empty
+        m = new Measurement();
+        assertFalse(m.hasExactlyOneMeasurement());
+
+        // only r2
+        m = new Measurement(2.12f);
+        assertTrue(m.hasExactlyOneMeasurement());
+
+        // only r1 r2
+        m = new Measurement(2.12f, 9.51f);
+        assertFalse(m.hasExactlyOneMeasurement());
+
+        // only r0 r1 r2
+        m = new Measurement(2.12f, 9.51f, 31.64f);
+        assertFalse(m.hasExactlyOneMeasurement());
     }
 
-    /**
-     * This method tests the computation of insulin to inject in the case of blood sugar level stable (r2 = r1)
-     */
-
     @Test
-    public void TestComputeInsulinToInjectC2()
+    public void testHasThreeMeasurements()
     {
-        Measurement measurement = new Measurement(15.84f, 15.84f);
-        assertEquals(measurement.getR2(), measurement.getR1());
-        assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
-        assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-    }
+        Measurement m;
 
-    /**
-     * This method tests the computation of insulin to inject in the case of blood sugar level increasing (r2 > r1)
-     * and the rate of increase decreasing ((r2 - r1) < (r1 - r0))
-     */
+        // empty
+        m = new Measurement();
+        assertFalse(m.hasThreeMeasurements());
 
-    @Test
-    public void TestComputeInsulinToInjectC3()
-    {
-        Measurement measurement = new Measurement(15.34f, 20.84f, 21.84f);
-        assertTrue(measurement.getR2() > measurement.getR1());
-        assertTrue(measurement.getR2() - measurement.getR1() < measurement.getR1()- measurement.getR0());
-        assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
-        assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-    }
+        // only r2
+        m = new Measurement(2.12f);
+        assertFalse(m.hasThreeMeasurements());
 
-    /**
-     * This method tests the computation of insulin to inject in the case of blood sugar level increasing (r2 > r1)
-     * and the rate of increase stable or increasing ((r2 - r1) >= (r1 - r0))
-     */
+        // only r1 r2
+        m = new Measurement(2.12f, 9.51f);
+        assertFalse(m.hasThreeMeasurements());
 
-    @Test
-    public void TestComputeInsulinToInjectC4()
-    {
-        Measurement measurement = new Measurement(15.20f, 20.80f, 34.90f);
-        assertTrue(measurement.getR2() > measurement.getR1());
-        assertTrue(measurement.getR2() - measurement.getR1() >= measurement.getR1()- measurement.getR0());
-        assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
-        assertEquals(measurement.getCompDose(), Integer.valueOf(4));
-    }
+        // only r0 r1 r2
+        m = new Measurement(2.12f, 9.51f, 31.64f);
+        assertTrue(m.hasThreeMeasurements());
 
-    /**
-     * This method tests the computation of insulin to inject in the case of blood sugar level increasing (r2 > r1)
-     * and the rate of increase stable or increasing ((r2 - r1) >= (r1 - r0)) and result of rounded division not equal to zero
-     * In this case we also test the minDose of insulin injection
-     */
+        // only r1
+        m = new Measurement(9.51f, null);
+        assertFalse(m.hasThreeMeasurements());
 
-    @Test
-    public void TestComputeInsulinToInjectC5()
-    {
-        Measurement measurement = new Measurement(33.0f, 34.0f, 35.0f);
-        assertTrue(measurement.getR2() > measurement.getR1());
-        assertTrue(measurement.getR2() - measurement.getR1() >= measurement.getR1()- measurement.getR0());
-        assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
-        assertEquals(measurement.getCompDose(), Integer.valueOf(1));
+        // only r0
+        m = new Measurement(9.51f, null, null);
+        assertFalse(m.hasThreeMeasurements());
+
+        // only r1, r0
+        m = new Measurement(9.51f, 6.35f, null);
+        assertFalse(m.hasThreeMeasurements());
+
+        // only r2, r0
+        m = new Measurement(9.51f, null, 6.35f);
+        assertFalse(m.hasThreeMeasurements());
     }
 }

@@ -1,5 +1,5 @@
 package LD_InsulinPump;
 
-public class NeedleAssembly {
-    public void injectInsulin(Integer insulinToInject){}
+public interface NeedleAssembly {
+    public void injectInsulin(Integer insulinToInject) throws HardwareIssueException;
 }

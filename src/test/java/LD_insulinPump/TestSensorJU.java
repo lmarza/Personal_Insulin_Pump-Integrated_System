@@ -22,8 +22,8 @@ public class TestSensorJU {
     @Test
     public void testFailRunMeasurement()
     {
-        // using 877 as a 'random' number: the HW check will fail
-        Sensor sensor = new SensorRandomImpl(new Random(), new RandomHardwareFixTest(877));
+        // using 0 as a 'random' number: the HW check will fail
+        Sensor sensor = new SensorRandomImpl(new Random(), new RandomHardwareFixTest(0));
         assertThrows(HardwareIssueException.class, () -> {
             sensor.runMeasurement();
         });
@@ -41,7 +41,7 @@ public class TestSensorJU {
     public void testIsHardwareNotWorking()
     {
         //using 877 as a 'random' number: the HW test will fail
-        Sensor sensor = new SensorRandomImpl(new Random(), new RandomHardwareFixTest(877));
+        Sensor sensor = new SensorRandomImpl(new Random(), new RandomHardwareFixTest(0));
         assertFalse(((SensorRandomImpl) sensor).isHardwareWorking());
     }
 }

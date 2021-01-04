@@ -64,7 +64,6 @@ public class Measurement {
         this.r2 = r2;
     }
 
-
     @Override
     public String toString() {
         return "Measurement[" +
@@ -80,7 +79,6 @@ public class Measurement {
     }
 
     public boolean hasThreeMeasurements() {
-
         return this.r2 != null && this.r1 != null && this.r0 != null;
     }
 }

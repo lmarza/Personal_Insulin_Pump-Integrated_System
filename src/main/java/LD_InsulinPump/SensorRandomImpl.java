@@ -5,6 +5,7 @@ import java.util.Random;
 public class SensorRandomImpl implements Sensor, CheckHardware {
     private Random randomMeasurementGenerator;
     private Random randomCheckHWGenerator;
+    private int bound = 1000;
     
     final static Float maxBloodSugarValue = 35f;
 
@@ -24,7 +25,7 @@ public class SensorRandomImpl implements Sensor, CheckHardware {
         if(!isHardwareWorking())
             throw new HardwareIssueException("Sensor Hardware Issue");
 
-        return 1 + randomMeasurementGenerator.nextFloat() * (maxBloodSugarValue - 1) ;
+        return 1 + randomMeasurementGenerator.nextFloat() * (maxBloodSugarValue - 1);
     }
 
     @Override
@@ -32,9 +33,10 @@ public class SensorRandomImpl implements Sensor, CheckHardware {
     {
         int randomNum = randomCheckHWGenerator.nextInt(bound);
 
-        if (randomNum > 876 && randomNum < 890)
+        if (randomNum == 0 || (randomNum > 876 && randomNum < 890))
             return false;
 
         return true;
+
     }
 }

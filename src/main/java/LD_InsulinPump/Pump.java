@@ -1,5 +1,5 @@
 package LD_InsulinPump;
 
-public class Pump {
-    public void collectInsulin(Integer insulinToCollect){}
+public interface Pump {
+    public void collectInsulin(Integer insulinToCollect) throws HardwareIssueException;
 }

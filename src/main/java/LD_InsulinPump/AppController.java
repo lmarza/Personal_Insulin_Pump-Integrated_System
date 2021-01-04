@@ -22,8 +22,8 @@ public class AppController {
     private ControllerState state = ControllerState.RUNNING;
     private List<Measurement> measurements = new ArrayList<Measurement>();
     private Sensor sensor = new SensorRandomImpl(new Random(), new Random());
-    private Pump pump = new Pump();
-    private NeedleAssembly needleAssembly = new NeedleAssembly();
+    private Pump pump = new PumpRandomImpl(new Random());
+    private NeedleAssembly needleAssembly = new NeedleRandomImpl(new Random());
     private ScheduledExecutorService executor;
 
     private final int initialDelay = 5; //in seconds
@@ -127,19 +127,16 @@ public class AppController {
         return null;
     }
 
-
     private void checkHardwareIssue() throws HardwareIssueException
     {
-        /*try
-        {
-            testHardware.testAllSystem();
-        }
-        catch (HardwareIssueException e)
-        {
-            state = ControllerState.ERROR;
-            this.template.convertAndSend("/topic/state", "Hardware issue: general system failure");
-            throw e;
-        }*/
+        if(!((SensorRandomImpl) sensor).isHardwareWorking())
+            throwExceptionAndSend("Hardware issue: sensor issue");
+
+        if(!((PumpRandomImpl) pump).isHardwareWorking())
+            throwExceptionAndSend("Hardware issue: pump issue");
+
+        if(!((NeedleRandomImpl) needleAssembly).isHardwareWorking())
+            throwExceptionAndSend("Hardware issue: needle issue");
     }
 
     private Float measureBloodSugarLevel() throws HardwareIssueException {
@@ -164,8 +161,8 @@ public class AppController {
             measurementList.add(new Measurement(measurementList.get(measurementList.size()-1).getR1(), measurementList.get(measurementList.size()-1).getR2(),lastMeasurement));
     }
 
-    public int computeInsulinToInject(Measurement measurement){
-
+    public int computeInsulinToInject(Measurement measurement)
+    {
         int compDose = 0;
 
         if(measurement.hasExactlyOneMeasurement())
@@ -229,5 +226,11 @@ public class AppController {
         }*/
 
         needleAssembly.injectInsulin(insulinToInject);
+    }
+
+    public void throwExceptionAndSend(String message) throws HardwareIssueException {
+        state = ControllerState.ERROR;
+        this.template.convertAndSend("/topic/state", message);
+        throw new HardwareIssueException(message);
     }
 }
