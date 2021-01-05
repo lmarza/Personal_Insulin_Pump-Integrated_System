@@ -1,6 +1,8 @@
 package LD_InsulinPump;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Controller;
@@ -30,16 +32,30 @@ public class AppController {
     private final int measurementSchedule = 10; //in seconds
     private final int hardwareTestSchedule = 1; // in seconds
     private final int insulinMinDose = 1;
-
     @Autowired
     private SimpMessagingTemplate template;
+
+
+    public AppController(ScheduledExecutorService executor) {
+        this.executor = executor;
+    }
+
+    @Autowired
+    public AppController(ControllerState state, Sensor sensor, Pump pump, NeedleAssembly needleAssembly, SimpMessagingTemplate template) {
+        this.state = state;
+        this.sensor = sensor;
+        this.pump = pump;
+        this.needleAssembly = needleAssembly;
+        this.template = template;
+    }
+
 
     @RequestMapping("/")
     public String index(){
         executor = Executors.newScheduledThreadPool(1);
 
         runAndSendMeasurement(executor);
-        runAndSendHardwareTest(executor);
+        runAndSendHardwareCheck(executor);
 
         return "insulinPump";
     }
@@ -64,13 +80,14 @@ public class AppController {
                 Measurement currentMeasurement = null;
 
                 if(state.equals(ControllerState.RUNNING))
-                    currentMeasurement = measurementFlow(); //this also updates the state attribute
+                    currentMeasurement = measurementFlow(measurements); //this also updates the state attribute
 
                 // check again if the state has changed (eg: hardware test failure)
                 if(currentMeasurement != null && state.equals(ControllerState.RUNNING))
                 {
                     template.convertAndSend("/topic/measurements", currentMeasurement);
-                    System.out.println(currentMeasurement);
+
+                    //System.out.println(currentMeasurement);
                 }
             }
         };
@@ -81,7 +98,7 @@ public class AppController {
 
     //1 sec
     //@Scheduled(fixedDelay=1000)
-    public void runAndSendHardwareTest(ScheduledExecutorService executor)
+    public void runAndSendHardwareCheck(ScheduledExecutorService executor)
     {
         Runnable runMeasurement = new Runnable() {
             public void run()
@@ -103,7 +120,7 @@ public class AppController {
         executor.scheduleAtFixedRate(runMeasurement, initialDelay, hardwareTestSchedule, TimeUnit.SECONDS);
     }
 
-    public Measurement measurementFlow()
+    public Measurement measurementFlow(List<Measurement> measurements)
     {
         Float bloodSugarLevel;
         Integer compDose;
@@ -124,10 +141,11 @@ public class AppController {
         {
             this.template.convertAndSend("/topic/state", "Hardware Issue: reboot device!");
         }
+
         return null;
     }
 
-    private void checkHardwareIssue() throws HardwareIssueException
+    public void checkHardwareIssue() throws HardwareIssueException
     {
         if(!((SensorRandomImpl) sensor).isHardwareWorking())
             throwExceptionAndSend("Hardware issue: sensor issue");
@@ -187,50 +205,26 @@ public class AppController {
 
                 if(compDose == 0)
                 {
-                    //measurements.get(measurements.size()-1).setCompDose(insulinMinDose);
                     return insulinMinDose;
                 }
             }
         }
 
-        //measurements.get(measurements.size()-1).setCompDose(compDose);
         return compDose;
     }
 
 
-
     private void injectInsulin(Integer insulinToInject) throws HardwareIssueException
     {
-        /*try
-        {
-            testHardware.testPump(pump);
-        }
-        catch (HardwareIssueException e)
-        {
-            state = ControllerState.ERROR;
-            this.template.convertAndSend("/topic/state", "Hardware issue: pump issue");
-            throw e;
-        }*/
-
         pump.collectInsulin(insulinToInject);
-/*
-        try
-        {
-            testHardware.testNeedle(needleAssembly);
-        }
-        catch (HardwareIssueException e)
-        {
-            state = ControllerState.ERROR;
-            this.template.convertAndSend("/topic/state", "Hardware issue: needle issue");
-            throw e;
-        }*/
-
         needleAssembly.injectInsulin(insulinToInject);
     }
 
     public void throwExceptionAndSend(String message) throws HardwareIssueException {
         state = ControllerState.ERROR;
-        this.template.convertAndSend("/topic/state", message);
+        template.convertAndSend("/topic/state", message);
         throw new HardwareIssueException(message);
     }
+
+
 }
