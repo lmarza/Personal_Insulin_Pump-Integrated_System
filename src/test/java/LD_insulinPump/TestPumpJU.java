@@ -43,4 +43,10 @@ public class TestPumpJU
         Pump pump = new PumpRandomImpl(new RandomHardwareFixTest(0));
         assertFalse(((PumpRandomImpl) pump).isHardwareWorking());
     }
+
+    @Test
+    public void testEquals()
+    {
+        assertTrue(new PumpRandomImpl(new Random()).equals(new PumpRandomImpl(new Random())));
+    }
 }

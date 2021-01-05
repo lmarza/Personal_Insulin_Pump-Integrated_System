@@ -1,5 +1,6 @@
 package LD_InsulinPump;
 
+import java.util.Objects;
 import java.util.Random;
 
 public class SensorRandomImpl implements Sensor, CheckHardware {
@@ -38,5 +39,13 @@ public class SensorRandomImpl implements Sensor, CheckHardware {
 
         return true;
 
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SensorRandomImpl that = (SensorRandomImpl) o;
+        return bound == that.bound;
     }
 }

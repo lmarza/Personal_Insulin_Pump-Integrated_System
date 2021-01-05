@@ -5,11 +5,9 @@ import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class TestMeasurementJU
-{
+public class TestMeasurementJU {
     @Test
-    public void testMeasurementEmptyConstructor()
-    {
+    public void testMeasurementEmptyConstructor() {
         Measurement measurement = new Measurement();
         assertNull(measurement.getCompDose());
         assertNull(measurement.getR0());
@@ -18,8 +16,7 @@ public class TestMeasurementJU
     }
 
     @Test
-    public void testMeasurementConstructorOneParam()
-    {
+    public void testMeasurementConstructorOneParam() {
         Measurement measurement = new Measurement(5f);
         assertEquals(Integer.valueOf(0), measurement.getCompDose());
         assertNull(measurement.getR0());
@@ -28,8 +25,7 @@ public class TestMeasurementJU
     }
 
     @Test
-    public void testMeasurementConstructorTwoParam()
-    {
+    public void testMeasurementConstructorTwoParam() {
         Measurement measurement = new Measurement(21.9f, 5f);
         assertEquals(Integer.valueOf(0), measurement.getCompDose());
         assertNull(measurement.getR0());
@@ -38,8 +34,7 @@ public class TestMeasurementJU
     }
 
     @Test
-    public void testMeasurementConstructorThreeParam()
-    {
+    public void testMeasurementConstructorThreeParam() {
         Measurement measurement = new Measurement(7.61f, 21.9f, 5f);
         assertEquals(Integer.valueOf(0), measurement.getCompDose());
         assertEquals(Float.valueOf(7.61f), measurement.getR0());
@@ -48,55 +43,41 @@ public class TestMeasurementJU
     }
 
     @Test
-    public void testMeasurementCompDose()
-    {
+    public void testMeasurementCompDose() {
         Measurement measurement = new Measurement();
         measurement.setCompDose(5);
         assertEquals(Integer.valueOf(5), measurement.getCompDose());
     }
 
     @Test
-    public void testMeasurementR0()
-    {
+    public void testMeasurementR0() {
         Measurement measurement = new Measurement();
         measurement.setR0(5f);
         assertEquals(Float.valueOf(5f), measurement.getR0());
     }
 
     @Test
-    public void testMeasurementR1()
-    {
+    public void testMeasurementR1() {
         Measurement measurement = new Measurement();
         measurement.setR1(5f);
         assertEquals(Float.valueOf(5f), measurement.getR1());
     }
 
     @Test
-    public void testMeasurementR2()
-    {
+    public void testMeasurementR2() {
         Measurement measurement = new Measurement();
         measurement.setR2(5f);
         assertEquals(Float.valueOf(5f), measurement.getR2());
     }
 
     @Test
-    public void testToString()
-    {
+    public void testToString() {
         Measurement measurement = new Measurement(5.212f, 16.2344f, 27.364f);
         assertEquals("Measurement[compDose=0, r0=5,21, r1=16,23, r2=27,36]", measurement.toString());
     }
 
-    /*
-    * public boolean hasExactlyOneMeasurement() {
-        return this.r2 != null && this.r1 == null && this.r0 == null;
-    }
-
-    public boolean hasThreeMeasurements() {
-        return this.r2 != null && this.r1 != null && this.r0 != null;
-    }*/
     @Test
-    public void testHasExactlyOneMeasurement()
-    {
+    public void testHasExactlyOneMeasurement() {
         Measurement m;
 
         // empty
@@ -117,8 +98,7 @@ public class TestMeasurementJU
     }
 
     @Test
-    public void testHasThreeMeasurements()
-    {
+    public void testHasThreeMeasurements() {
         Measurement m;
 
         // empty
@@ -152,5 +132,19 @@ public class TestMeasurementJU
         // only r2, r0
         m = new Measurement(9.51f, null, 6.35f);
         assertFalse(m.hasThreeMeasurements());
+    }
+
+    @Test
+    public void testEquals()
+    {
+        assertTrue(new Measurement(5f, 4.23f, 18.92f).equals(new Measurement(5f, 4.23f, 18.92f)));
+        assertTrue(new Measurement(4.23f, 18.92f).equals(new Measurement(4.23f, 18.92f)));
+        assertTrue(new Measurement(18.92f).equals(new Measurement(18.92f)));
+    }
+
+    @Test
+    public void testHashcode()
+    {
+        assertEquals(new Measurement(5f, 4.23f, 18.92f).hashCode(), new Measurement(5f, 4.23f, 18.92f).hashCode());
     }
 }

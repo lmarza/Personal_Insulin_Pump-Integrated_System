@@ -81,4 +81,20 @@ public class Measurement {
     public boolean hasThreeMeasurements() {
         return this.r2 != null && this.r1 != null && this.r0 != null;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Measurement that = (Measurement) o;
+        return Objects.equals(compDose, that.compDose) &&
+                Objects.equals(r0, that.r0) &&
+                Objects.equals(r1, that.r1) &&
+                Objects.equals(r2, that.r2);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(compDose, r0, r1, r2);
+    }
 }

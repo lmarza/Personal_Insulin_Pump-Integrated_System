@@ -43,4 +43,10 @@ public class TestNeedleAssemblyJU
         NeedleAssembly needle = new NeedleRandomImpl(new RandomHardwareFixTest(0));
         assertFalse(((NeedleRandomImpl) needle).isHardwareWorking());
     }
+
+    @Test
+    public void testEquals()
+    {
+        assertTrue(new NeedleRandomImpl(new Random()).equals(new NeedleRandomImpl(new Random())));
+    }
 }

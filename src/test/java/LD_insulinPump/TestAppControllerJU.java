@@ -1,13 +1,10 @@
 package LD_insulinPump;
 
 import LD_InsulinPump.*;
+import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-import javax.naming.ldap.Control;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -18,18 +15,122 @@ import static org.junit.Assert.*;
 
 public class TestAppControllerJU
 {
+    private List<Measurement> measurements;
+    private ControllerState runningState;
+    private ControllerState errorState;
+    private Sensor normalSensor;
+    private Sensor workingSensor;
+    private Sensor notWorkingSensor;
+    private Pump normalPump;
+    private Pump workingPump;
+    private Pump notWorkingPump;
+    private NeedleAssembly normalNeedle;
+    private NeedleAssembly workingNeedle;
+    private NeedleAssembly notWorkingNeedle;
+    private SimpMessagingTemplate template;
 
-    private SimpMessagingTemplate template = new SimpMessagingTemplate(new MessageChannel() {
-        @Override
-        public boolean send(Message<?> message, long timeout) {
-            return true;
-        }
-    });
+    @Before
+    public void cleanAndSet()
+    {
+        measurements = new ArrayList<>();
+        runningState = ControllerState.RUNNING;
+        errorState = ControllerState.ERROR;
 
+        normalSensor = new SensorRandomImpl(new Random(), new Random());
+        workingSensor = new SensorRandomImpl(new Random(), new RandomHardwareFixTest(1));
+        notWorkingSensor = new SensorRandomImpl(new Random(), new RandomHardwareFixTest(0));
+
+        normalPump = new PumpRandomImpl(new Random());
+        workingPump = new PumpRandomImpl(new RandomHardwareFixTest(1));
+        notWorkingPump = new PumpRandomImpl(new RandomHardwareFixTest(0));
+
+        normalNeedle = new NeedleRandomImpl(new Random());
+        workingNeedle = new NeedleRandomImpl(new RandomHardwareFixTest(1));
+        notWorkingNeedle = new NeedleRandomImpl(new RandomHardwareFixTest(0));
+
+        template = new SimpMessagingTemplate((message, timeout) -> true);
+    }
 
     @Test
-    public void TestUpdateMeasurementBloodSugarLevel() {
-        AppController appController = new AppController();
+    public void testEmptyAppController()
+    {
+        AppController appController = new AppController(measurements,
+                runningState,
+                normalSensor,
+                normalPump,
+                normalNeedle,
+                template);
+        assertEquals(measurements, appController.getMeasurements());
+        assertEquals(runningState, appController.getState());
+        assertEquals(normalSensor, appController.getSensor());
+        assertEquals(normalPump, appController.getPump());
+        assertEquals(normalNeedle, appController.getNeedleAssembly());
+        assertEquals(template, appController.getTemplate());
+    }
+
+    @Test
+    public void testMeasurementConstructorOneParam()
+    {
+        Measurement measurement = new Measurement(5f);
+        assertEquals(Integer.valueOf(0), measurement.getCompDose());
+        assertNull(measurement.getR0());
+        assertNull(measurement.getR1());
+        assertEquals(Float.valueOf(5f), measurement.getR2());
+    }
+
+    @Test(expected = Test.None.class /* no exception expected */)
+    public void testSuccessMeasureBloodSugarLevel() throws HardwareIssueException {
+        AppController appController = new AppController(measurements,
+                runningState,
+                workingSensor,
+                workingPump,
+                workingNeedle,
+                template);
+        appController.measureBloodSugarLevel();
+    }
+
+    @Test
+    public void testFailMeasureBloodSugarLevel()
+    {
+        AppController appController = new AppController(measurements,
+                runningState,
+                notWorkingSensor,
+                notWorkingPump,
+                notWorkingNeedle,
+                template);
+        assertThrows(HardwareIssueException.class, () -> {
+            appController.measureBloodSugarLevel();
+        });
+    }
+
+    @Test(expected = Test.None.class /* no exception expected */)
+    public void testSuccessInjectInsulin() throws HardwareIssueException {
+        AppController appController = new AppController(measurements,
+                runningState,
+                workingSensor,
+                workingPump,
+                workingNeedle,
+                template);
+        appController.injectInsulin(5);
+    }
+
+    @Test
+    public void testFailInjectInsulin() {
+        AppController appController = new AppController(measurements,
+                runningState,
+                notWorkingSensor,
+                notWorkingPump,
+                notWorkingNeedle,
+                template);
+        assertThrows(HardwareIssueException.class, () -> {
+            appController.injectInsulin(5);
+        });
+    }
+
+    @Test
+    public void testUpdateMeasurementBloodSugarLevel()
+    {
+        AppController appController = new AppController(measurements, runningState, normalSensor, normalPump, normalNeedle, template);
         List<Measurement> measurementList = new ArrayList<>();
 
         //empty list
@@ -67,21 +168,25 @@ public class TestAppControllerJU
         Measurement measurement = new Measurement(15.84f, 10.35f);
         assertTrue(measurement.getR2() < measurement.getR1());
         assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
+        measurement.setCompDose(new AppController(measurements, runningState, normalSensor, normalPump, normalNeedle, template).computeInsulinToInject(measurement));
         assertEquals(measurement.getCompDose(), Integer.valueOf(0));
     }
 
     /**
      * This method tests the computation of insulin to inject in the case of blood sugar level stable (r2 = r1)
      */
-
     @Test
     public void testComputeInsulinToInjectC2()
     {
         Measurement measurement = new Measurement(15.84f, 15.84f);
         assertEquals(measurement.getR2(), measurement.getR1());
         assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
+        measurement.setCompDose(new AppController(measurements,
+                runningState,
+                normalSensor,
+                normalPump,
+                normalNeedle,
+                template).computeInsulinToInject(measurement));
         assertEquals(measurement.getCompDose(), Integer.valueOf(0));
     }
 
@@ -89,7 +194,6 @@ public class TestAppControllerJU
      * This method tests the computation of insulin to inject in the case of blood sugar level increasing (r2 > r1)
      * and the rate of increase decreasing ((r2 - r1) < (r1 - r0))
      */
-
     @Test
     public void testComputeInsulinToInjectC3()
     {
@@ -97,7 +201,12 @@ public class TestAppControllerJU
         assertTrue(measurement.getR2() > measurement.getR1());
         assertTrue(measurement.getR2() - measurement.getR1() < measurement.getR1()- measurement.getR0());
         assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
+        measurement.setCompDose(new AppController(measurements,
+                runningState,
+                normalSensor,
+                normalPump,
+                normalNeedle,
+                template).computeInsulinToInject(measurement));
         assertEquals(measurement.getCompDose(), Integer.valueOf(0));
     }
 
@@ -105,7 +214,6 @@ public class TestAppControllerJU
      * This method tests the computation of insulin to inject in the case of blood sugar level increasing (r2 > r1)
      * and the rate of increase stable or increasing ((r2 - r1) >= (r1 - r0))
      */
-
     @Test
     public void testComputeInsulinToInjectC4()
     {
@@ -113,7 +221,12 @@ public class TestAppControllerJU
         assertTrue(measurement.getR2() > measurement.getR1());
         assertTrue(measurement.getR2() - measurement.getR1() >= measurement.getR1()- measurement.getR0());
         assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
+        measurement.setCompDose(new AppController(measurements,
+                runningState,
+                normalSensor,
+                normalPump,
+                normalNeedle,
+                template).computeInsulinToInject(measurement));
         assertEquals(measurement.getCompDose(), Integer.valueOf(4));
     }
 
@@ -122,7 +235,6 @@ public class TestAppControllerJU
      * and the rate of increase stable or increasing ((r2 - r1) >= (r1 - r0)) and result of rounded division not equal to zero
      * In this case we also test the minDose of insulin injection
      */
-
     @Test
     public void testComputeInsulinToInjectC5()
     {
@@ -130,66 +242,81 @@ public class TestAppControllerJU
         assertTrue(measurement.getR2() > measurement.getR1());
         assertTrue(measurement.getR2() - measurement.getR1() >= measurement.getR1()- measurement.getR0());
         assertEquals(measurement.getCompDose(), Integer.valueOf(0));
-        measurement.setCompDose(new AppController().computeInsulinToInject(measurement));
+        measurement.setCompDose(new AppController(measurements,
+                runningState,
+                normalSensor,
+                normalPump,
+                normalNeedle,
+                template).computeInsulinToInject(measurement));
         assertEquals(measurement.getCompDose(), Integer.valueOf(1));
     }
 
-
     @Test(expected = Test.None.class /* no exception expected */)
-    public void testSuccessRunAndMeasurement() throws InterruptedException {
+    public void testSuccessRunAndMeasurement() throws InterruptedException
+    {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
         // we create an appController to run test on runAndSendMeasurement method. In particular we create appController
         // with Sensor,Pump and Needle not affected by issues (injection of correct random for test)
-        AppController appController = new AppController(ControllerState.RUNNING,
-                                    new SensorRandomImpl(new Random(), new RandomHardwareFixTest(1)),
-                                    new PumpRandomImpl(new RandomHardwareFixTest(1)),
-                                    new NeedleRandomImpl(new RandomHardwareFixTest(1)), template);
+        AppController appController = new AppController(measurements,
+                runningState,
+                workingSensor,
+                workingPump,
+                workingNeedle,
+                template);
         appController.runAndSendMeasurement(executor);
         Thread.sleep(5000);
-
     }
 
     @Test(expected = Test.None.class /* no exception expected */)
-    public void testFailRunAndMeasurement() throws InterruptedException {
+    public void testFailRunAndMeasurement() throws InterruptedException
+    {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
         // we create an appController to run test on runAndSendMeasurement method. In particular we create appController
         // with Sensor,Pump and Needle affected by issues (injection of correct random for test)
-        AppController appController = new AppController(ControllerState.ERROR,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(0)),
-                new PumpRandomImpl(new RandomHardwareFixTest(0)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(0)), template);
+        AppController appController = new AppController(measurements,
+                errorState,
+                notWorkingSensor,
+                notWorkingPump,
+                notWorkingNeedle,
+                template);
         appController.runAndSendMeasurement(executor);
         Thread.sleep(5000);
-
     }
 
     @Test(expected = Test.None.class /* no exception expected */)
-    public void testSuccessRunAndHardwareCheck() throws InterruptedException {
+    public void testSuccessRunAndHardwareCheck() throws InterruptedException
+    {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
         // we create an appController to run test on runAndSendMeasurement method. In particular we create appController
         // with Sensor,Pump and Needle not affected by issues (injection of correct random for test)
-        AppController appController = new AppController(ControllerState.RUNNING,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(1)),
-                new PumpRandomImpl(new RandomHardwareFixTest(1)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(1)), template);
+        AppController appController = new AppController(measurements,
+                runningState,
+                workingSensor,
+                workingPump,
+                workingNeedle,
+                template);
         appController.runAndSendHardwareCheck(executor);
         Thread.sleep(5000);
-
     }
 
     @Test(expected = Test.None.class /* no exception expected */)
-    public void testFailRunAndHardwareCheck() throws InterruptedException {
+    public void testFailRunAndHardwareCheck() throws InterruptedException
+    {
         ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+
         // we create an appController to run test on runAndSendMeasurement method. In particular we create appController
         // with Sensor,Pump and Needle affected by issues (injection of correct random for test)
-        AppController appController = new AppController(ControllerState.RUNNING,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(0)),
-                new PumpRandomImpl(new RandomHardwareFixTest(0)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(0)), template);
+        AppController appController = new AppController(measurements,
+                runningState,
+                notWorkingSensor,
+                notWorkingPump,
+                notWorkingNeedle,
+                template);
         appController.runAndSendHardwareCheck(executor);
         Thread.sleep(5000);
-
-
     }
 
 
@@ -197,11 +324,13 @@ public class TestAppControllerJU
     public void testSuccessMeasurementFlow()
     {
         Measurement measurement;
+        AppController appController = new AppController(measurements,
+                runningState,
+                workingSensor,
+                workingPump,
+                workingNeedle,
+                template);
 
-        AppController appController = new AppController(ControllerState.RUNNING,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(1)),
-                new PumpRandomImpl(new RandomHardwareFixTest(1)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(1)), template);
         measurement = appController.measurementFlow(new ArrayList<Measurement>());
         assertNotNull(measurement);
     }
@@ -210,105 +339,100 @@ public class TestAppControllerJU
     public void testFailMeasurementFlow()
     {
         Measurement measurement;
+        AppController appController;
 
-        AppController appController = new AppController(ControllerState.RUNNING,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(0)),
-                new PumpRandomImpl(new RandomHardwareFixTest(0)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(0)), template);
+        appController = new AppController(measurements,
+                runningState,
+                notWorkingSensor,
+                notWorkingPump,
+                notWorkingNeedle,
+                template);
         measurement = appController.measurementFlow(new ArrayList<Measurement>());
         assertNull(measurement);
 
-        appController = new AppController(ControllerState.ERROR,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(0)),
-                new PumpRandomImpl(new RandomHardwareFixTest(0)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(0)), template);
+        appController = new AppController(measurements,
+                errorState,
+                notWorkingSensor,
+                notWorkingPump,
+                notWorkingNeedle,
+                template);
         measurement = appController.measurementFlow(new ArrayList<Measurement>());
         assertNull(measurement);
     }
 
-
     @Test
-    public void testCheckHardwareIssue() throws HardwareIssueException {
+    public void testCheckHardwareIssue() throws HardwareIssueException
+    {
         // fail only sensor
-        AppController appController = new AppController(ControllerState.RUNNING,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(0)),
-                new PumpRandomImpl(new RandomHardwareFixTest(1)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(1)), template);
+        AppController appController = new AppController(measurements,
+                runningState,
+                notWorkingSensor,
+                workingPump,
+                workingNeedle,
+                template);
 
         assertThrows(HardwareIssueException.class, () -> {
             appController.checkHardwareIssue();
         });
 
         // fail only pump
-        AppController appController2 = new AppController(ControllerState.RUNNING,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(1)),
-                new PumpRandomImpl(new RandomHardwareFixTest(0)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(1)), template);
+        AppController appController2 = new AppController(measurements,
+                runningState,
+                workingSensor,
+                notWorkingPump,
+                workingNeedle,
+                template);
 
         assertThrows(HardwareIssueException.class, () -> {
             appController2.checkHardwareIssue();
         });
 
         // fail only needle
-        AppController appController3 = new AppController(ControllerState.RUNNING,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(1)),
-                new PumpRandomImpl(new RandomHardwareFixTest(1)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(0)), template);
+        AppController appController3 = new AppController(measurements,
+            runningState,
+            workingSensor,
+            workingPump,
+            notWorkingNeedle,
+            template);
 
         assertThrows(HardwareIssueException.class, () -> {
             appController3.checkHardwareIssue();
         });
-
     }
 
     @Test(expected = Test.None.class /* no exception expected */)
-    public void testSuccessCheckHardwareIssue() throws HardwareIssueException {
-        AppController appController = new AppController(ControllerState.RUNNING,
-                new SensorRandomImpl(new Random(), new RandomHardwareFixTest(1)),
-                new PumpRandomImpl(new RandomHardwareFixTest(1)),
-                new NeedleRandomImpl(new RandomHardwareFixTest(1)), template);
+    public void testSuccessCheckHardwareIssue() throws HardwareIssueException
+    {
+        AppController appController = new AppController(measurements,
+                runningState,
+                workingSensor,
+                workingPump,
+                workingNeedle,
+                template);
         appController.checkHardwareIssue();
     }
-
-
 
     @Test
     public void testRebootDevice()
     {
-        AppController appController = new AppController(Executors.newScheduledThreadPool(1));
+        AppController appController = new AppController(measurements,
+                runningState,
+                normalSensor,
+                normalPump,
+                normalNeedle,
+                template);
         assertEquals("redirect:/", appController.rebootDevice());
     }
 
     @Test
     public void testIndex()
     {
-        AppController appController = new AppController(Executors.newScheduledThreadPool(1));
+        AppController appController = new AppController(measurements,
+                runningState,
+                normalSensor,
+                normalPump,
+                normalNeedle,
+                template);
         assertEquals("insulinPump", appController.index());
     }
-
-      /*
-    * public AppController() {}
-
-    public AppController(ScheduledExecutorService executor) {
-        this.executor = executor;
-    }
-
-    public AppController(ControllerState state, Sensor sensor, Pump pump, NeedleAssembly needleAssembly, SimpMessagingTemplate template) {
-        this.state = state;
-        this.sensor = sensor;
-        this.pump = pump;
-        this.needleAssembly = needleAssembly;
-        this.template = template;
-    }
-    */
-    @Test
-    public void testEmptyAppController()
-    {
-
-    }
-
-
-
-
-
 }

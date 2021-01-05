@@ -1,10 +1,7 @@
 package LD_InsulinPump;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,41 +16,36 @@ import java.util.concurrent.TimeUnit;
 * */
 
 @Controller
-@EnableScheduling
-public class AppController {
-    private ControllerState state = ControllerState.RUNNING;
-    private List<Measurement> measurements = new ArrayList<Measurement>();
-    private Sensor sensor = new SensorRandomImpl(new Random(), new Random());
-    private Pump pump = new PumpRandomImpl(new Random());
-    private NeedleAssembly needleAssembly = new NeedleRandomImpl(new Random());
-    private ScheduledExecutorService executor;
-
+public class AppController
+{
     private final int initialDelay = 5; //in seconds
     private final int measurementSchedule = 10; //in seconds
     private final int hardwareTestSchedule = 1; // in seconds
     private final int insulinMinDose = 1;
+
     @Autowired
     private SimpMessagingTemplate template;
-
-
-    public AppController(ScheduledExecutorService executor) {
-        this.executor = executor;
-    }
+    private ControllerState state;
+    private List<Measurement> measurements;
+    private Sensor sensor;
+    private Pump pump;
+    private NeedleAssembly needleAssembly;
+    private ScheduledExecutorService executor;
 
     @Autowired
-    public AppController(ControllerState state, Sensor sensor, Pump pump, NeedleAssembly needleAssembly, SimpMessagingTemplate template) {
+    public AppController(List<Measurement> measurements, ControllerState state, Sensor sensor, Pump pump, NeedleAssembly needleAssembly, SimpMessagingTemplate template) {
+        this.measurements = measurements;
         this.state = state;
         this.sensor = sensor;
         this.pump = pump;
         this.needleAssembly = needleAssembly;
         this.template = template;
+        executor = Executors.newScheduledThreadPool(1);
     }
 
-
     @RequestMapping("/")
-    public String index(){
-        executor = Executors.newScheduledThreadPool(1);
-
+    public String index()
+    {
         runAndSendMeasurement(executor);
         runAndSendHardwareCheck(executor);
 
@@ -66,6 +58,7 @@ public class AppController {
         measurements.clear();
         state = ControllerState.RUNNING;
         executor.shutdownNow();
+        executor = Executors.newScheduledThreadPool(1);
 
         return "redirect:/";
     }
@@ -157,7 +150,8 @@ public class AppController {
             throwExceptionAndSend("Hardware issue: needle issue");
     }
 
-    private Float measureBloodSugarLevel() throws HardwareIssueException {
+    public Float measureBloodSugarLevel() throws HardwareIssueException
+    {
         try
         {
            return sensor.runMeasurement();
@@ -213,8 +207,7 @@ public class AppController {
         return compDose;
     }
 
-
-    private void injectInsulin(Integer insulinToInject) throws HardwareIssueException
+    public void injectInsulin(Integer insulinToInject) throws HardwareIssueException
     {
         pump.collectInsulin(insulinToInject);
         needleAssembly.injectInsulin(insulinToInject);
@@ -226,5 +219,27 @@ public class AppController {
         throw new HardwareIssueException(message);
     }
 
+    public SimpMessagingTemplate getTemplate() {
+        return template;
+    }
 
+    public ControllerState getState() {
+        return state;
+    }
+
+    public List<Measurement> getMeasurements() {
+        return measurements;
+    }
+
+    public Sensor getSensor() {
+        return sensor;
+    }
+
+    public Pump getPump() {
+        return pump;
+    }
+
+    public NeedleAssembly getNeedleAssembly() {
+        return needleAssembly;
+    }
 }

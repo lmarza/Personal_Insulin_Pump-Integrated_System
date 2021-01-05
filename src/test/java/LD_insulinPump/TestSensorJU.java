@@ -44,4 +44,10 @@ public class TestSensorJU {
         Sensor sensor = new SensorRandomImpl(new Random(), new RandomHardwareFixTest(0));
         assertFalse(((SensorRandomImpl) sensor).isHardwareWorking());
     }
+
+    @Test
+    public void testEquals()
+    {
+        assertTrue(new SensorRandomImpl(new Random(), new Random()).equals(new SensorRandomImpl(new Random(), new Random())));
+    }
 }

@@ -6,7 +6,6 @@ public class NeedleRandomImpl implements NeedleAssembly, CheckHardware{
     private Random randomCheckHWGenerator;
     private int bound = 1000;
 
-
     public NeedleRandomImpl(Random randomCheckHWGenerator)
     {
         this.randomCheckHWGenerator = randomCheckHWGenerator;
@@ -26,5 +25,13 @@ public class NeedleRandomImpl implements NeedleAssembly, CheckHardware{
             return false;
 
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NeedleRandomImpl that = (NeedleRandomImpl) o;
+        return bound == that.bound;
     }
 }
