@@ -1,6 +1,8 @@
 package LD_insulinPump;
 
 import LD_InsulinPump.*;
+import LD_InsulinPump_Mock.Pump;
+import LD_InsulinPump_Mock.PumpRandomImpl;
 import org.junit.Test;
 
 import java.util.Random;

@@ -1,6 +1,7 @@
-package LD_InsulinPump;
+package LD_InsulinPump_Mock;
 
-import java.util.Objects;
+import LD_InsulinPump.HardwareIssueException;
+
 import java.util.Random;
 
 public class SensorRandomImpl implements Sensor, CheckHardware {

@@ -1,29 +1,29 @@
-package LD_InsulinPump;
+package LD_InsulinPump_Mock;
+
+import LD_InsulinPump.HardwareIssueException;
 
 import java.util.Random;
 
-public class PumpRandomImpl implements Pump, CheckHardware
-{
+public class NeedleRandomImpl implements NeedleAssembly, CheckHardware {
     private Random randomCheckHWGenerator;
     private int bound = 1000;
 
-    public PumpRandomImpl(Random randomCheckHWGenerator)
+    public NeedleRandomImpl(Random randomCheckHWGenerator)
     {
         this.randomCheckHWGenerator = randomCheckHWGenerator;
     }
 
     @Override
-    public void collectInsulin(Integer insulinToCollect) throws HardwareIssueException {
+    public void injectInsulin(Integer insulinToInject) throws HardwareIssueException {
         if(!isHardwareWorking())
-            throw new HardwareIssueException("Pump Hardware Issue");
+            throw new HardwareIssueException("Needle Hardware Issue");
     }
 
     @Override
-    public boolean isHardwareWorking()
-    {
+    public boolean isHardwareWorking() {
         int randomNum = randomCheckHWGenerator.nextInt(bound);
 
-        if (randomNum == 0 || (randomNum > 42 && randomNum < 53))
+        if (randomNum == 0 || (randomNum > 101 && randomNum < 112))
             return false;
 
         return true;
@@ -33,7 +33,7 @@ public class PumpRandomImpl implements Pump, CheckHardware
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PumpRandomImpl that = (PumpRandomImpl) o;
+        NeedleRandomImpl that = (NeedleRandomImpl) o;
         return bound == that.bound;
     }
 }

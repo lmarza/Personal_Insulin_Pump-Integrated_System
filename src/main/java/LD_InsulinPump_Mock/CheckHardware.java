@@ -1,4 +1,4 @@
-package LD_InsulinPump;
+package LD_InsulinPump_Mock;
 
 public interface CheckHardware
 {
