@@ -3,6 +3,9 @@ import org.junit.*;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.opera.OperaDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -13,44 +16,65 @@ public class TestingImplementation {
 
     @BeforeClass
     public static void setupWebdriverChromeDriver() {
-        System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir") + "/src/test/resources/chromedriver");
+        //System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir") + "/src/test/resources/chromedriverLinux");
+        System.setProperty("webdriver.opera.driver", System.getProperty("user.dir") + "/src/test/resources/operaDriver.exe");
     }
 
     @Before
     public void setup() {
-        driver = new ChromeDriver();
+        //driver = new ChromeDriver();
+        driver = new OperaDriver();
     }
 
     @After
     public void teardown() {
         if (driver != null) {
-            //driver.quit();
+            driver.quit();
         }
     }
 
     @Test
-    public void testWebInterface() throws InterruptedException {
+    public void testWebInterface() throws InterruptedException
+    {
         driver.get("http://localhost:8080/");
-        Thread.sleep(5000);
+
         assertThat(driver.getTitle(), containsString("Insulin pump device"));
+        assertThat(driver.getPageSource(), containsString("Personal insulin pump device"));
 
-        String firstState = driver.findElement(By.id("state")).getText();
-        String measurement = driver.findElement(By.id("r2")).getText();
+        Thread.sleep(5000);
+
+        String beforeState = driver.findElement(By.id("state")).getText();
+        String beforeR2 = driver.findElement(By.id("r2")).getText();
+
         Thread.sleep(10000);
-        String secondState = driver.findElement(By.id("state")).getText();
-        String measurement2 = driver.findElement(By.id("r2")).getText();
 
-        System.out.println(firstState + " " + secondState);
-        System.out.println(measurement + " " +  measurement2);
+        String afterState = driver.findElement(By.id("state")).getText();
+        String afterR2 = driver.findElement(By.id("r2")).getText();
 
+        System.out.println(beforeState + " " + afterState);
+        System.out.println(beforeR2 + " " +  afterR2);
 
-        if (firstState.equalsIgnoreCase(secondState) && firstState.toLowerCase().contains("running"))
-            Assert.assertNotEquals(measurement2, measurement);
-        else if (firstState.equalsIgnoreCase(secondState) && firstState.toLowerCase().contains("hardware issue"))
-            Assert.assertEquals(measurement2, measurement);
-        // if the states are not equals for example first state running and second hardware issue the values should be the same
+        if (beforeState.equalsIgnoreCase(afterState) && beforeState.toLowerCase().contains("running"))
+            Assert.assertNotEquals(afterR2, beforeR2);
+        else if (beforeState.equalsIgnoreCase(afterState) && beforeState.toLowerCase().contains("hardware issue"))
+            Assert.assertEquals(afterR2, beforeR2);
+        // if the states are not equals (for example first state 'running' and second 'hardware issue') the values should be the same
         else
-            Assert.assertEquals(measurement2, measurement);
-
+            Assert.assertEquals(afterR2, beforeR2);
     }
+
+    @Test
+    public void testRebootButton()
+    {
+        driver.get("http://localhost:8080/");
+
+        //seconds are required by WebDriverWait, so 1000 seconds are just a way to say 'don't throw an exception for a long time'
+        WebDriverWait wait = new WebDriverWait(driver, 1000);
+        wait.until(ExpectedConditions.visibilityOfElementLocated(By.className("button")));
+        driver.findElement(By.className("button")).click();
+
+        assertThat(driver.findElement(By.id("state")).getText().toLowerCase(), containsString("booting device..."));
+        assertThat(driver.findElement(By.id("r2")).getText().toLowerCase(), containsString("booting device..."));
+    }
+
 }
