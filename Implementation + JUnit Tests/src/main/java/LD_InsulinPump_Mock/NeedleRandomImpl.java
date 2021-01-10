@@ -6,7 +6,7 @@ import java.util.Random;
 
 public class NeedleRandomImpl implements NeedleAssembly, CheckHardware {
     private Random randomCheckHWGenerator;
-    private int bound = 1000;
+    private int bound = 1500;
 
     public NeedleRandomImpl(Random randomCheckHWGenerator)
     {

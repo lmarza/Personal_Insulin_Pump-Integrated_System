@@ -68,6 +68,7 @@ public class AppController
     //@Scheduled(fixedDelay=10000)
     public void runAndSendMeasurement(ScheduledExecutorService executor)
     {
+
         Runnable runMeasurement = new Runnable() {
             public void run()
             {
@@ -81,8 +82,8 @@ public class AppController
                 {
                     template.convertAndSend("/topic/measurements", currentMeasurement);
 
-                    //System.out.println(currentMeasurement);
                 }
+
             }
         };
 
@@ -90,10 +91,12 @@ public class AppController
         executor.scheduleAtFixedRate(runMeasurement, initialDelay, measurementSchedule, TimeUnit.SECONDS);
     }
 
+
     //1 sec
     //@Scheduled(fixedDelay=1000)
     public void runAndSendHardwareCheck(ScheduledExecutorService executor)
     {
+
         Runnable runMeasurement = new Runnable() {
             public void run()
             {

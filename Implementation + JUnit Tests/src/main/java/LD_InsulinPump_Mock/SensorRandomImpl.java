@@ -7,7 +7,7 @@ import java.util.Random;
 public class SensorRandomImpl implements Sensor, CheckHardware {
     private Random randomMeasurementGenerator;
     private Random randomCheckHWGenerator;
-    private int bound = 1000;
+    private int bound = 1500;
     
     final static Float maxBloodSugarValue = 35f;
 

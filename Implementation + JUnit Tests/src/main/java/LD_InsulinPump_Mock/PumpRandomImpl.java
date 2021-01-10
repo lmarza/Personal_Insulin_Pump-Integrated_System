@@ -7,7 +7,7 @@ import java.util.Random;
 public class PumpRandomImpl implements Pump, CheckHardware
 {
     private Random randomCheckHWGenerator;
-    private int bound = 1000;
+    private int bound = 1500;
 
     public PumpRandomImpl(Random randomCheckHWGenerator)
     {
