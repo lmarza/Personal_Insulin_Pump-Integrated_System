@@ -1,0 +1,135 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: Config</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">LD_InsulinPump</a> ]
+</div>
+
+<h1>Coverage Summary for Class: Config (LD_InsulinPump)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Config</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/ 7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85,7%
+  </span>
+  <span class="absValue">
+    (6/ 7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package LD_InsulinPump;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import LD_InsulinPump_Mock.*;
+<i>4</i>&nbsp;import org.springframework.beans.factory.annotation.Autowired;
+<i>5</i>&nbsp;import org.springframework.context.annotation.Bean;
+<i>6</i>&nbsp;import org.springframework.context.annotation.ComponentScan;
+<i>7</i>&nbsp;import org.springframework.context.annotation.Configuration;
+<i>8</i>&nbsp;import org.springframework.messaging.simp.SimpMessagingTemplate;
+<i>9</i>&nbsp;
+<i>10</i>&nbsp;import java.util.ArrayList;
+<i>11</i>&nbsp;import java.util.List;
+<i>12</i>&nbsp;import java.util.Random;
+<i>13</i>&nbsp;
+<i>14</i>&nbsp;@Configuration
+<i>15</i>&nbsp;@ComponentScan(&quot;LD_InsulinPump&quot;)
+<b class="fc"><i>16</i>&nbsp;public class Config {</b>
+<i>17</i>&nbsp;
+<i>18</i>&nbsp;    @Autowired
+<i>19</i>&nbsp;    private SimpMessagingTemplate template;
+<i>20</i>&nbsp;
+<i>21</i>&nbsp;    @Bean
+<i>22</i>&nbsp;    public ControllerState controllerState(){
+<b class="fc"><i>23</i>&nbsp;        return ControllerState.RUNNING;</b>
+<i>24</i>&nbsp;    }
+<i>25</i>&nbsp;
+<i>26</i>&nbsp;    @Bean
+<i>27</i>&nbsp;    public Sensor sensor(){
+<b class="fc"><i>28</i>&nbsp;        return new SensorRandomImpl(new Random(), new Random());</b>
+<i>29</i>&nbsp;    }
+<i>30</i>&nbsp;
+<i>31</i>&nbsp;    @Bean
+<i>32</i>&nbsp;    public Pump pump(){
+<b class="fc"><i>33</i>&nbsp;        return new PumpRandomImpl(new Random());</b>
+<i>34</i>&nbsp;    }
+<i>35</i>&nbsp;
+<i>36</i>&nbsp;    @Bean
+<i>37</i>&nbsp;    public NeedleAssembly needle(){
+<b class="fc"><i>38</i>&nbsp;        return new NeedleRandomImpl(new Random());</b>
+<i>39</i>&nbsp;    }
+<i>40</i>&nbsp;
+<i>41</i>&nbsp;    @Bean
+<i>42</i>&nbsp;    public List&lt;Measurement&gt; measurementsList()
+<i>43</i>&nbsp;    {
+<b class="fc"><i>44</i>&nbsp;        return new ArrayList&lt;&gt;();</b>
+<i>45</i>&nbsp;    }
+<i>46</i>&nbsp;
+<i>47</i>&nbsp;    @Bean
+<i>48</i>&nbsp;    public SimpMessagingTemplate template()
+<i>49</i>&nbsp;    {
+<b class="nc"><i>50</i>&nbsp;        return template;</b>
+<i>51</i>&nbsp;    }
+<i>52</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-01-13 10:19</div>
+</div>
+</body>
+</html>

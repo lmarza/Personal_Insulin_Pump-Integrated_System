@@ -1,0 +1,183 @@
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html id="htmlId">
+<head>
+  <title>Coverage Report :: Measurement</title>
+  <style type="text/css">
+    @import "../../.css/coverage.css";
+  </style>
+</head>
+
+<body>
+<div class="header"></div>
+
+<div class="content">
+<div class="breadCrumbs">
+    [ <a href="../../index.html">all classes</a> ]
+    [ <a href="../index.html">LD_InsulinPump</a> ]
+</div>
+
+<h1>Coverage Summary for Class: Measurement (LD_InsulinPump)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">Measurement</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/ 1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (17/ 17)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (37/ 37)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<div class="sourceCode"><i>1</i>&nbsp;package LD_InsulinPump;
+<i>2</i>&nbsp;
+<i>3</i>&nbsp;import java.util.Objects;
+<i>4</i>&nbsp;
+<i>5</i>&nbsp;import javax.persistence.Entity;
+<i>6</i>&nbsp;import javax.persistence.GeneratedValue;
+<i>7</i>&nbsp;import javax.persistence.GenerationType;
+<i>8</i>&nbsp;import javax.persistence.Id;
+<i>9</i>&nbsp;
+<i>10</i>&nbsp;@Entity
+<i>11</i>&nbsp;public class Measurement {
+<i>12</i>&nbsp;    @Id
+<i>13</i>&nbsp;    @GeneratedValue(strategy=GenerationType.AUTO)
+<i>14</i>&nbsp;    private Long id;
+<i>15</i>&nbsp;    private Integer compDose;
+<i>16</i>&nbsp;    private Float r0,r1,r2;
+<i>17</i>&nbsp;
+<b class="fc"><i>18</i>&nbsp;    public Measurement(){}</b>
+<i>19</i>&nbsp;
+<i>20</i>&nbsp;    public Measurement(Float r2) {
+<b class="fc"><i>21</i>&nbsp;        this(null, null, r2);</b>
+<b class="fc"><i>22</i>&nbsp;    }</b>
+<i>23</i>&nbsp;
+<i>24</i>&nbsp;    public Measurement(Float r1, Float r2) {
+<b class="fc"><i>25</i>&nbsp;        this(null,r1,r2);</b>
+<b class="fc"><i>26</i>&nbsp;    }</b>
+<i>27</i>&nbsp;
+<b class="fc"><i>28</i>&nbsp;    public Measurement(Float r0, Float r1, Float r2) {</b>
+<b class="fc"><i>29</i>&nbsp;        this.compDose = 0;</b>
+<b class="fc"><i>30</i>&nbsp;        this.r0 = r0;</b>
+<b class="fc"><i>31</i>&nbsp;        this.r1 = r1;</b>
+<b class="fc"><i>32</i>&nbsp;        this.r2 = r2;</b>
+<b class="fc"><i>33</i>&nbsp;    }</b>
+<i>34</i>&nbsp;
+<i>35</i>&nbsp;    public Integer getCompDose() {
+<b class="fc"><i>36</i>&nbsp;        return compDose;</b>
+<i>37</i>&nbsp;    }
+<i>38</i>&nbsp;
+<i>39</i>&nbsp;    public void setCompDose(Integer compDose) {
+<b class="fc"><i>40</i>&nbsp;        this.compDose = compDose;</b>
+<b class="fc"><i>41</i>&nbsp;    }</b>
+<i>42</i>&nbsp;
+<i>43</i>&nbsp;    public Float getR0() {
+<b class="fc"><i>44</i>&nbsp;        return r0;</b>
+<i>45</i>&nbsp;    }
+<i>46</i>&nbsp;
+<i>47</i>&nbsp;    public void setR0(Float r0) {
+<b class="fc"><i>48</i>&nbsp;        this.r0 = r0;</b>
+<b class="fc"><i>49</i>&nbsp;    }</b>
+<i>50</i>&nbsp;
+<i>51</i>&nbsp;    public Float getR1() {
+<b class="fc"><i>52</i>&nbsp;        return r1;</b>
+<i>53</i>&nbsp;    }
+<i>54</i>&nbsp;
+<i>55</i>&nbsp;    public void setR1(Float r1) {
+<b class="fc"><i>56</i>&nbsp;        this.r1 = r1;</b>
+<b class="fc"><i>57</i>&nbsp;    }</b>
+<i>58</i>&nbsp;
+<i>59</i>&nbsp;    public Float getR2() {
+<b class="fc"><i>60</i>&nbsp;        return r2;</b>
+<i>61</i>&nbsp;    }
+<i>62</i>&nbsp;
+<i>63</i>&nbsp;    public void setR2(Float r2) {
+<b class="fc"><i>64</i>&nbsp;        this.r2 = r2;</b>
+<b class="fc"><i>65</i>&nbsp;    }</b>
+<i>66</i>&nbsp;
+<i>67</i>&nbsp;    @Override
+<i>68</i>&nbsp;    public String toString() {
+<b class="fc"><i>69</i>&nbsp;        return &quot;Measurement[&quot; +</b>
+<i>70</i>&nbsp;                &quot;compDose=&quot; + compDose +
+<b class="fc"><i>71</i>&nbsp;                &quot;, r0=&quot; + String.format(&quot;%.2f&quot;, r0) +</b>
+<b class="fc"><i>72</i>&nbsp;                &quot;, r1=&quot; + String.format(&quot;%.2f&quot;, r1) +</b>
+<b class="fc"><i>73</i>&nbsp;                &quot;, r2=&quot; + String.format(&quot;%.2f&quot;, r2) +</b>
+<i>74</i>&nbsp;                &#39;]&#39;;
+<i>75</i>&nbsp;    }
+<i>76</i>&nbsp;
+<i>77</i>&nbsp;    public boolean hasExactlyOneMeasurement() {
+<b class="fc"><i>78</i>&nbsp;        return this.r2 != null &amp;&amp; this.r1 == null &amp;&amp; this.r0 == null;</b>
+<i>79</i>&nbsp;    }
+<i>80</i>&nbsp;
+<i>81</i>&nbsp;    public boolean hasThreeMeasurements() {
+<b class="fc"><i>82</i>&nbsp;        return this.r2 != null &amp;&amp; this.r1 != null &amp;&amp; this.r0 != null;</b>
+<i>83</i>&nbsp;    }
+<i>84</i>&nbsp;
+<i>85</i>&nbsp;    @Override
+<i>86</i>&nbsp;    public boolean equals(Object o) {
+<b class="fc"><i>87</i>&nbsp;        if (this == o) return true;</b>
+<b class="fc"><i>88</i>&nbsp;        if (o == null || getClass() != o.getClass()) return false;</b>
+<b class="fc"><i>89</i>&nbsp;        Measurement that = (Measurement) o;</b>
+<b class="fc"><i>90</i>&nbsp;        return Objects.equals(compDose, that.compDose) &amp;&amp;</b>
+<b class="fc"><i>91</i>&nbsp;                Objects.equals(r0, that.r0) &amp;&amp;</b>
+<b class="fc"><i>92</i>&nbsp;                Objects.equals(r1, that.r1) &amp;&amp;</b>
+<b class="fc"><i>93</i>&nbsp;                Objects.equals(r2, that.r2);</b>
+<i>94</i>&nbsp;    }
+<i>95</i>&nbsp;
+<i>96</i>&nbsp;    @Override
+<i>97</i>&nbsp;    public int hashCode() {
+<b class="fc"><i>98</i>&nbsp;        return Objects.hash(compDose, r0, r1, r2);</b>
+<i>99</i>&nbsp;    }
+<i>100</i>&nbsp;}
+</div>
+</div>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2021-01-13 10:19</div>
+</div>
+</body>
+</html>
