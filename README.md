@@ -19,7 +19,7 @@ Pumps insulin from a reservoir to the needle assembly. It's in charge of deliver
 * **LD_InsulinPump.AppController**
 Controls the entire system. This has two possible states: a run state and an error state. The latter state is triggered only when there are hardware issues.
 * **Displays**
-There are 3 displays. The first display displays system messages/hardware issues; the second one shows the last dose of insulin delivered and the last blood sugar measurement; the third one shows the current clock time.
+There are 4 displays. The first display displays system messages/hardware issues; the second one shows the last dose of insulin computed. The third one shows the the last blood sugar measurement and the last one shows the current clock time.
 * **Clock**
 Provides the controller with the current time.
 
