@@ -152,8 +152,9 @@ The controller states that there is a hardware issue, so it must stop all the cu
 ![](https://i.imgur.com/RMIAatn.png)
 
 ### Activity diagram:
-![](https://i.imgur.com/qz35aum.png)
+![](https://i.imgur.com/Ak502mU.jpg)
 
 ### Class diagram:
-![](https://i.imgur.com/IsKB5Rq.png)
+![](https://i.imgur.com/rwrib1t.png)
+
 
