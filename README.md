@@ -50,7 +50,7 @@ The following table is based on the last 3 blood sugar level measurements: in pa
 
 4.	Under normal operating conditions, the system is in the "running" state.
 5.	The controller shall run a self-test program every one minute. The result of the test is used to compute the new state:  if the test is 'true' (in case of an error) the new state become 'error', otherwise, if the test is 'false' (the device has not issues) the state remains 'running'. If the new state is 'error' (hardware issues) the system is suspended.
-6. There are 3 displays. The first display displays system messages/hardware issues; the second one shows the last dose of insulin delivered and the last blood sugar measurement; the third one shows the current clock time.
+6. There are 4 displays. The first display displays system messages/hardware issues; the second one shows the last dose of insulin computed. The third one shows the the last blood sugar measurement and the last one shows the current clock time.
 7.	At the beginning of each 24 hour period, the cumulative dose of insulin delivered is reset to 0.
 8.	A blood sugar sensor measures the current blood sugar reading in micrograms/millilitre. This is updated every 10 minutes and it is normally between 1 and 35 micrograms/millilitre.
 
