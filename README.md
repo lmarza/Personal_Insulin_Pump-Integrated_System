@@ -149,7 +149,11 @@ The controller states that there is a hardware issue, so it must stop all the cu
 ### Class diagram:
 ![](https://i.imgur.com/rwrib1t.png)
 
-//todo: sequence di tutto il programma e quello specifico per il calcolo dell'insulina da iniettare
+### Sequence diagrams:
+General:
+![](https://i.imgur.com/Qjk0LV4.png)
+
+Specific:
 
 ## Test cases
 
@@ -165,8 +169,6 @@ Since a part of the view is developed using JavaScript, Selenium was used to per
 It was chosen because of Spring conflicts during configuration and JavaScript issues. Also, the suggested JWebUnit framework is no longer updated and no support is provided for newer JavaScript features, such as classes and object declaration.
 
 ### Unit tests:
-
-
 
 By default IntelliJ IDEA uses Gradle to run JUnit tests. In order to run the JUnit tests, it's required to change IDE configuration as reported below:
 * Go to "File->Settings->Build, execution, deployment->Build tools->Gradle"
