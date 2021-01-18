@@ -153,7 +153,8 @@ The controller states that there is a hardware issue, so it must stop all the cu
 General:
 ![](https://i.imgur.com/Qjk0LV4.png)
 
-Specific:
+AppController.computeInsulinToInject:
+![](https://i.imgur.com/u0w9IkX.png)
 
 ## Test cases
 
