@@ -239,3 +239,8 @@ The tests check if the page behaves correctly:
 * blood sugar measurement and computed dose of insulin change every ten seconds;
 * in case of hardware issues, the view is updated
 * reboot button in case of hardware issues
+
+## Authors
+
+* **Deborah Pintani** - [DebbyX3](https://github.com/DebbyX3)
+* **Luca Marzari** - [LM095](https://github.com/LM095)
